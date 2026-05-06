@@ -5,4 +5,6 @@
   {:target :browser
    :output-dir "public/js"
    :modules {:main {:init-fn CADscript.core/init}}
-   :devtools {:nrepl-port 8777}}}}
+   :devtools {:http-port 8700
+            :http-root "public"
+            :nrepl-port 8777}}}}

@@ -8,11 +8,11 @@
 
 ## 2. CAD Geometry Kernel
 
-- [ ] 2.1 Create `src/kernel/init.cljs` — async WASM initialization with loading state
-- [ ] 2.2 Create `src/kernel/primitives.cljs` — `make-sphere`, `make-box` wrappers over opencascade.js interop
-- [ ] 2.3 Create `src/kernel/mesh.cljs` — tessellation: OC shape → `{:vertices [...] :indices [...]}` map
-- [ ] 2.4 Create `src/kernel/lifecycle.cljs` — OC object tracking and `destroy` / cleanup
-- [ ] 2.5 Create `src/kernel/api.cljs` — unified API facade re-exporting all kernel functions
+- [x] 2.1 Create `src/kernel/init.cljs` — async WASM initialization with loading state
+- [x] 2.2 Create `src/kernel/primitives.cljs` — `make-sphere`, `make-box` wrappers over opencascade.js interop
+- [x] 2.3 Create `src/kernel/mesh.cljs` — tessellation: OC shape → `{:vertices [...] :indices [...]}` map
+- [x] 2.4 Create `src/kernel/lifecycle.cljs` — OC object tracking and `destroy` / cleanup
+- [x] 2.5 Create `src/kernel/api.cljs` — unified API facade re-exporting all kernel functions
 
 ## 3. defmodel Macro & Reactive Model System
 
