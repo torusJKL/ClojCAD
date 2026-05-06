@@ -16,10 +16,10 @@
 
 ## 3. defmodel Macro & Reactive Model System
 
-- [ ] 3.1 Create `src/model/core.cljs` — `reactive-model` constructor: captures param schema + fn, supports caching
-- [ ] 3.2 Create `src/model/defmodel.cljs` — `defmodel` macro: expands to reactive-model, extracts param keys, handles metadata (opacity)
-- [ ] 3.3 Create `src/model/tag.cljs` — `tag` macro with `*scene-context*` dynamic var for opt-in intermediate registration
-- [ ] 3.4 Create `src/model/registry.cljs` — model registry: `model-name → {fn, param-keys, last-params, last-mesh, opts}`
+- [x] 3.1 Create `src/model/core.cljs` — `reactive-model` constructor: captures param schema + fn, supports caching
+- [x] 3.2 Create `src/model/defmodel.clj` — `defmodel` macro: expands to reactive-model, extracts param keys, handles metadata (opacity)
+- [x] 3.3 Create `src/model/tag.cljs` — `tag` macro with `*scene-context*` dynamic var for opt-in intermediate registration
+- [x] 3.4 Create `src/model/registry.cljs` — model registry: `model-name → {fn, param-keys, last-params, last-mesh, opts}`
 
 ## 4. Scene Manager
 

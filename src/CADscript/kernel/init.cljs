@@ -1,16 +1,17 @@
-(ns CADscript.kernel.init
-  (:require ["opencascade.js" :as opencascade]))
+(ns CADscript.kernel.init)
 
 (defonce oc-instance (atom nil))
 (defonce loading? (atom true))
 (defonce error (atom nil))
 
 (defn init-kernel []
-  (-> (opencascade)
-      (.then (fn [oc]
-               (reset! oc-instance oc)
-               (reset! loading? false)
-               oc))
+  (-> (js/import "opencascade.js/dist/opencascade.wasm.js")
+      (.then (fn [mod]
+               (let [opencascade (.-default mod)
+                     oc (opencascade.)]
+                 (reset! oc-instance oc)
+                 (reset! loading? false)
+                 oc)))
       (.catch (fn [e]
                 (reset! error (str e))
                 (reset! loading? false)
