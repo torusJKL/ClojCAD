@@ -1,0 +1,12 @@
+{
+  "name": "cad-repl-poc",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "opencascade.js": "^1.0.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "shadow-cljs": "^2.28.0"
+  }
+}

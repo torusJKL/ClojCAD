@@ -1,0 +1,8 @@
+{:source-paths ["src"]
+ :dependencies [[reagent "1.2.0"]]
+ :builds
+ {:dev
+  {:target :browser
+   :output-dir "public/js"
+   :modules {:main {:init-fn CADscript.core/init}}
+   :devtools {:nrepl-port 8777}}}}

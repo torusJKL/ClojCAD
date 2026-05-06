@@ -1,10 +1,10 @@
 ## 1. Project Setup
 
-- [ ] 1.1 Create shadow-cljs project with `shadow-cljs.edn` and `package.json` (dependencies: opencascade.js, three, reagent, reagent)
-- [ ] 1.2 Configure `:dev` build target with `:npm-module` and nrepl support
-- [ ] 1.3 Create `index.html` entry point with Three.js viewport container and Reagent mount point
-- [ ] 1.4 Create `src/main/core.cljs` with application bootstrap
-- [ ] 1.5 Verify shadow-cljs compiles, nrepl connects, and page loads
+- [x] 1.1 Create shadow-cljs project with `shadow-cljs.edn` and `package.json` (dependencies: opencascade.js, three, reagent, reagent)
+- [x] 1.2 Configure `:dev` build target with `:npm-module` and nrepl support
+- [x] 1.3 Create `index.html` entry point with Three.js viewport container and Reagent mount point
+- [x] 1.4 Create `src/main/core.cljs` with application bootstrap
+- [x] 1.5 Verify shadow-cljs compiles, nrepl connects, and page loads
 
 ## 2. CAD Geometry Kernel
 
