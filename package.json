@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "shadow-cljs": "^2.28.0"
+  },
+  "scripts": {
+    "postinstall": "node scripts/patch-three.js"
   }
 }

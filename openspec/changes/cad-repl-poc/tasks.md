@@ -31,10 +31,12 @@
 
 ## 5. Three.js Viewport
 
-- [ ] 5.1 Create `src/viewport/scene.cljs` — Three.js scene, camera, renderer setup
-- [ ] 5.2 Create `src/viewport/controls.cljs` — OrbitControls integration
-- [ ] 5.3 Create `src/viewport/render.cljs` — `update-viewport!` function: clear scene, add meshes from scene manager
-- [ ] 5.4 Create `src/viewport/mesh-builder.cljs` — convert `{:vertices [...] :indices [...]}` to Three.js `BufferGeometry` + `Mesh`
+- [x] 5.1 Create `src/viewport/scene.cljs` — Three.js scene, camera, renderer setup
+  - [x] Background color `0x222222`, ambient + directional lights
+  - [x] GridHelper and AxesHelper for visual reference
+- [x] 5.2 Create `src/viewport/controls.cljs` — OrbitControls integration
+- [x] 5.3 Create `src/viewport/render.cljs` — `update-viewport!` function: clear scene, add meshes from scene manager
+- [x] 5.4 Create `src/viewport/mesh_builder.cljs` — convert `{:vertices [...] :indices [...]}` to Three.js `BufferGeometry` + `Mesh`
 
 ## 6. Reagent Layer Panel
 
