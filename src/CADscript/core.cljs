@@ -1,6 +1,5 @@
 (ns CADscript.core
-  (:require [CADscript.kernel.api :as kernel]
-            [CADscript.model.core]
+  (:require [CADscript.model.core]
             [CADscript.model.registry]
             [CADscript.model.tag]
             [CADscript.scene.manager :as sm]
@@ -20,8 +19,4 @@
   (sm/set-on-update! vr/update-viewport!)
   (vr/start-loop!)
   (rdomc/render ui-root [lp/layer-panel])
-  (demo/start-demo!)
-  (-> (kernel/init-kernel)
-      (.then (fn [oc]
-               (when oc
-                 (println "CAD kernel ready"))))))
+  (demo/start-demo!))

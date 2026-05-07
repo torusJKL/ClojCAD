@@ -16,18 +16,9 @@
                                  "/opencascade.wasm.wasm"
                                  path))})
                        (.then (fn [oc]
-                                 (js/console.log "OC module loaded" (.-BufferGeometry oc))
-                                 (try
-                                   (js/console.log "BRepPrimAPI_MakeSphere:" (str oc.BRepPrimAPI_MakeSphere))
-                                   (catch :default e
-                                     (js/console.log "MakeSphere error:" (str e))))
-                                 (try
-                                   (js/console.log "BRepPrimAPI_MakeBox:" (str oc.BRepPrimAPI_MakeBox))
-                                   (catch :default e
-                                     (js/console.log "MakeBox error:" (str e))))
-                                 (reset! oc-instance oc)
-                                 (reset! loading? false)
-                                 oc))
+                                  (reset! oc-instance oc)
+                                  (reset! loading? false)
+                                  oc))
                        (.catch (fn [e]
                                  (reset! error (str e))
                                  (reset! loading? false)

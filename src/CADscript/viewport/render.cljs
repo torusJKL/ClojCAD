@@ -3,13 +3,23 @@
             [CADscript.viewport.mesh-builder :as mb]
             [CADscript.scene.manager :as sm]))
 
+(defn- dispose-object [obj]
+  (when (.-geometry obj)
+    (.dispose (.-geometry obj)))
+  (when (.-material obj)
+    (.dispose (.-material obj))))
+
 (defn update-viewport! []
   (let [s @vs/scene
         r @vs/renderer
         c @vs/camera]
+    (doseq [child (.-children s)]
+      (dispose-object child))
     (.clear s)
     (doseq [[name entry] @sm/scene
-            :when (:visible? entry true)]
+            :when (and (:visible? entry true)
+                       (some? (:mesh entry))
+                       (not (:error entry)))]
       (let [main-mesh (mb/build-mesh (:mesh entry))
             opacity (get-in entry [:opts :opacity])]
         (when opacity

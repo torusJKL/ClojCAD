@@ -7,13 +7,15 @@
   (let [collapsed? (r/atom true)]
     (fn [[name entry]]
       [:div.layer-entry
-       [:label
-        [:input {:type "checkbox"
-                 :checked (:visible? entry true)
-                 :on-change #(if (:visible? entry true)
-                               (sm/hide name)
-                               (sm/show-model name))}]
-        (str name)]
+       (if-let [err (:error entry)]
+         [:div.error (str (str name) ": " err)]
+         [:label
+          [:input {:type "checkbox"
+                   :checked (:visible? entry true)
+                   :on-change #(if (:visible? entry true)
+                                 (sm/hide name)
+                                 (sm/show-model name))}]
+          (str name)])
        (when (seq (:tags entry))
          [:div.sub-layers
           [:button.sub-toggle {:on-click #(swap! collapsed? not)}
@@ -34,8 +36,7 @@
   (let [loading? @kernel/loading?
         err @kernel/error]
     [:div.layer-panel
-     (cond
-       err [:div.error (str "Error: " err)]
-       loading? [:div.loading "Loading CAD kernel..."])
      [:h3 "Layers"]
-     (into [:div] (map layer-entry) @sm/scene)]))
+     (into [:div]
+           (for [[name entry] @sm/scene]
+             ^{:key name} [layer-entry [name entry]]))]))
