@@ -16,7 +16,8 @@
           (set! (.. main-mesh -material -opacity) opacity)
           (set! (.. main-mesh -material -transparent) true))
         (.add s main-mesh)
-        (doseq [[label tag-mesh-data] (:tags entry)]
+        (doseq [[label tag-mesh-data] (:tags entry)
+                :when (get-in entry [:tags-visible label] true)]
           (let [tag-mesh (mb/build-mesh tag-mesh-data)]
             (.add s tag-mesh)))))
     (.render r s c)))

@@ -40,10 +40,10 @@
 
 ## 6. Reagent Layer Panel
 
-- [ ] 6.1 Create `src/ui/layer_panel.cljs` — Reagent component rendering model list with checkboxes
-- [ ] 6.2 Implement sub-layer disclosure for tagged intermediates
-- [ ] 6.3 Wire layer checkboxes to scene manager visibility toggles
-- [ ] 6.4 Style the layer panel (minimal CSS, functional over aesthetic)
+- [x] 6.1 Create `src/ui/layer_panel.cljs` — Reagent component rendering model list with checkboxes
+- [x] 6.2 Implement sub-layer disclosure for tagged intermediates
+- [x] 6.3 Wire layer checkboxes to scene manager visibility toggles
+- [x] 6.4 Style the layer panel (minimal CSS, functional over aesthetic)
 
 ## 7. Integration & PoC
 

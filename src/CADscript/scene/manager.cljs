@@ -20,9 +20,13 @@
                   :let [info (reg/lookup name)
                         result ((:fn info) new-val)
                         mesh (kernel/tessellate (:shape result))
-                        tags (reduce-kv (fn [m k v] (assoc m k (kernel/tessellate v))) {} (:tags result))]]
+                        tags (reduce-kv (fn [m k v] (assoc m k (kernel/tessellate v))) {} (:tags result))
+         new-tag-names (set (keys tags))
+         existing-tags-visible (:tags-visible entry {})
+         tags-visible (merge (zipmap new-tag-names (repeat true))
+                             (select-keys existing-tags-visible new-tag-names))]]
             (swap! scene assoc name
-              (assoc entry :mesh mesh :tags tags)))
+              (assoc entry :mesh mesh :tags tags :tags-visible tags-visible)))
           (when (seq dirty)
             (when-let [cb @on-update] (cb))))))
     true))
@@ -38,10 +42,12 @@
          merged (merge @params params-override)
          result (model merged)
          mesh (kernel/tessellate (:shape result))
-         tags (reduce-kv (fn [m k v] (assoc m k (kernel/tessellate v))) {} (:tags result))]
+         tags (reduce-kv (fn [m k v] (assoc m k (kernel/tessellate v))) {} (:tags result))
+         tags-visible (zipmap (keys tags) (repeat true))]
      (swap! scene assoc name
        {:mesh mesh
         :tags tags
+        :tags-visible tags-visible
         :opts (merge opts display-opts)
         :visible? true})
      (when-let [cb @on-update] (cb)))))
@@ -52,6 +58,14 @@
 
 (defn show-model [model-name]
   (swap! scene assoc-in [model-name :visible?] true)
+  (when-let [cb @on-update] (cb)))
+
+(defn hide-tag [model-name label]
+  (swap! scene assoc-in [model-name :tags-visible label] false)
+  (when-let [cb @on-update] (cb)))
+
+(defn show-tag [model-name label]
+  (swap! scene assoc-in [model-name :tags-visible label] true)
   (when-let [cb @on-update] (cb)))
 
 (defn set-opacity [model-name opacity]
