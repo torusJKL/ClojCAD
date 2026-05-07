@@ -9,7 +9,7 @@
   (let [opts (or (meta &form) {})
         simple? (not (map? (first params)))
         expanded-params (if simple?
-                          [(list :keys (vec params))]
+                          [(hash-map :keys (vec params))]
                           params)
         param-keys (extract-keys params)]
     (list 'def name

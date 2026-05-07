@@ -47,10 +47,10 @@
 
 ## 7. Integration & PoC
 
-- [ ] 7.1 Wire bootstrap sequence: WASM init → show loading → ready → enable REPL commands
-- [ ] 7.2 Create `src/demo.cljs` — PoC file: `(def params (atom {:r 10}))`, `(defmodel sphere [r] (make-sphere r))`, `(show sphere)`
-- [ ] 7.3 Verify end-to-end flow: load page → sphere appears → `(swap! params assoc :r 20)` at REPL → sphere updates
-- [ ] 7.4 Verify optional features: transparency via metadata, tag intermediate, layer toggle
+- [x] 7.1 Wire bootstrap sequence: WASM init → show loading → ready → enable REPL commands
+- [x] 7.2 Create `src/demo.cljs` — PoC file: `(def params (atom {:r 10}))`, `(defmodel sphere [r] (make-sphere r))`, `(show sphere)`
+- [x] 7.3 Verify end-to-end flow: load page → sphere appears → `(swap! params assoc :r 20)` at REPL → sphere updates
+- [x] 7.4 Verify optional features: transparency via metadata, tag intermediate, layer toggle
 
 ## 8. Polish
 

@@ -1,6 +1,7 @@
 (ns CADscript.ui.layer-panel
   (:require [reagent.core :as r]
-            [CADscript.scene.manager :as sm]))
+            [CADscript.scene.manager :as sm]
+            [CADscript.kernel.init :as kernel]))
 
 (defn layer-entry [[name entry]]
   (let [collapsed? (r/atom true)]
@@ -30,6 +31,11 @@
                 (str label)]]))])])))
 
 (defn layer-panel []
-  [:div.layer-panel
-   [:h3 "Layers"]
-   (into [:div] (map layer-entry) @sm/scene)])
+  (let [loading? @kernel/loading?
+        err @kernel/error]
+    [:div.layer-panel
+     (cond
+       err [:div.error (str "Error: " err)]
+       loading? [:div.loading "Loading CAD kernel..."])
+     [:h3 "Layers"]
+     (into [:div] (map layer-entry) @sm/scene)]))
