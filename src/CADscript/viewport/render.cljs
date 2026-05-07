@@ -12,10 +12,12 @@
 (defn update-viewport! []
   (let [s @vs/scene
         r @vs/renderer
-        c @vs/camera]
-    (doseq [child (.-children s)]
+        c @vs/camera
+        mg @vs/models-group]
+    (doseq [child (.-children mg)]
       (dispose-object child))
-    (.clear s)
+    (doseq [child (.-children mg)]
+      (.remove mg child))
     (doseq [[name entry] @sm/scene
             :when (and (:visible? entry true)
                        (some? (:mesh entry))
@@ -25,11 +27,11 @@
         (when opacity
           (set! (.. main-mesh -material -opacity) opacity)
           (set! (.. main-mesh -material -transparent) true))
-        (.add s main-mesh)
+        (.add mg main-mesh)
         (doseq [[label tag-mesh-data] (:tags entry)
                 :when (get-in entry [:tags-visible label] true)]
           (let [tag-mesh (mb/build-mesh tag-mesh-data)]
-            (.add s tag-mesh)))))
+            (.add mg tag-mesh)))))
     (.render r s c)))
 
 (defn start-loop! []

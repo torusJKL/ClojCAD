@@ -56,4 +56,4 @@
 
 - [x] 8.1 Handle error states gracefully (WASM load failure, invalid params)
 - [x] 8.2 Add Three.js resource cleanup on model re-evaluation (geometry/material .dispose)
-- [ ] 8.3 Verify nrebel workflow: eval individual forms, see viewer update without full page reload
+- [x] 8.3 Verify nrebel workflow: eval individual forms, see viewer update without full page reload

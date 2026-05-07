@@ -13,10 +13,9 @@
 (defonce ui-root (rdomc/create-root (js/document.getElementById "ui")))
 
 (defn init []
-  (println "CAD REPL PoC initialized")
   (vs/init-viewport!)
   (vc/init-controls!)
   (sm/set-on-update! vr/update-viewport!)
   (vr/start-loop!)
-  (rdomc/render ui-root [lp/layer-panel])
-  (demo/start-demo!))
+  (demo/start-demo!)
+  (rdomc/render ui-root [lp/layer-panel]))
