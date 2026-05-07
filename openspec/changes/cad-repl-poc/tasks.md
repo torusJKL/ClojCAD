@@ -23,11 +23,11 @@
 
 ## 4. Scene Manager
 
-- [ ] 4.1 Create `src/scene/manager.cljs` — scene state: atom holding `{model-name → {:mesh, :opts, :tags}}`
-- [ ] 4.2 Implement `show` function: idempotent model display with merge over shared params atom
-- [ ] 4.3 Implement params atom watcher: diff changed keys, identify dirty models, re-evaluate, push new meshes
-- [ ] 4.4 Implement visibility toggle: hide/show meshes without re-evaluation
-- [ ] 4.5 Implement opacity support: per-model transparency via Three.js material
+- [x] 4.1 Create `src/scene/manager.cljs` — scene state: atom holding `{model-name → {:mesh, :opts, :tags}}`
+- [x] 4.2 Implement `show` function: idempotent model display with merge over shared params atom
+- [x] 4.3 Implement params atom watcher: diff changed keys, identify dirty models, re-evaluate, push new meshes
+- [x] 4.4 Implement visibility toggle: hide/show meshes without re-evaluation
+- [x] 4.5 Implement opacity support: per-model transparency via Three.js material
 
 ## 5. Three.js Viewport
 
