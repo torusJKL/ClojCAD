@@ -6,16 +6,16 @@
             [CADscript.viewport.scene :as vs]
             [CADscript.viewport.controls :as vc]
             [CADscript.viewport.render :as vr]
-            [reagent.dom.client :as rdomc]
-            [CADscript.ui.layer-panel :as lp]
+            [CADscript.kernel.api :as kernel]
             [CADscript.demo :as demo]))
-
-(defonce ui-root (rdomc/create-root (js/document.getElementById "ui")))
 
 (defn init []
   (vs/init-viewport!)
   (vc/init-controls!)
   (sm/set-on-update! vr/update-viewport!)
   (vr/start-loop!)
-  (demo/start-demo!)
-  (rdomc/render ui-root [lp/layer-panel]))
+  (-> (kernel/init-kernel)
+      (.then (fn [_]
+               (demo/start-demo!)))
+      (.catch (fn [e]
+                (js/console.error "init-kernel failed:" e)))))
