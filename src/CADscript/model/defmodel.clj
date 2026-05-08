@@ -6,7 +6,7 @@
     (vec (map keyword params))))
 
 (defmacro defmodel [name params & body]
-  (let [opts (or (meta &form) {})
+  (let [opts (or (select-keys (meta &form) [:opacity]) {})
         simple? (not (map? (first params)))
         expanded-params (if simple?
                           [(hash-map :keys (vec params))]

@@ -1,9 +1,10 @@
 (ns CADscript.scene.manager
   (:require [CADscript.model.registry :as reg]
-            [CADscript.kernel.api :as kernel]))
+            [CADscript.kernel.api :as kernel]
+            [reagent.core :as r]))
 
 (defonce params (atom {}))
-(defonce scene (atom {}))
+(defonce scene (r/atom {}))
 (defonce on-update (atom nil))
 
 (defonce watch-installed
