@@ -1,0 +1,256 @@
+* ClojCAD
+
+ClojCAD is a browser-based parametric CAD environment written in ClojureScript.
+It uses OpenCascade.js as its geometry kernel and three-cad-viewer for interactive 3D rendering.
+Models are defined declaratively via a Clojure DSL and update in real-time as parameters change.
+
+* DSL Reference
+
+** =defmodel=
+
+Define a parametric model. The macro accepts an optional metadata map
+with =:opacity=.
+
+#+begin_src clojure
+(defmodel ^{:opacity 0.5} my-box [w d h]
+  (kernel/make-box w d h))
+#+end_src
+
+** Primitives
+
+All primitives return an OpenCascade =TopoDS_Shape=.
+
+#+begin_src clojure
+(kernel/make-sphere 10)           ;; radius
+(kernel/make-box 15 15 15)        ;; dx dy dz
+(kernel/make-cylinder 5 20)       ;; radius height
+(kernel/make-cone 5 10 15)        ;; radius1 radius2 height
+#+end_src
+
+** =tessellate=
+
+Convert a =TopoDS_Shape= into renderable mesh data (typed arrays).
+
+#+begin_src clojure
+(kernel/tessellate shape)             ;; default deviation 0.1
+(kernel/tessellate shape 0.05)        ;; custom max deviation
+#+end_src
+
+** =show=
+
+Add a model to the scene. Accepts optional parameter overrides and
+display options (=:opacity=). When no display opts are given it falls
+back to the metadata set in =defmodel=.
+
+#+begin_src clojure
+(sm/show my-box)                          ;; uses current params
+(sm/show my-box {:w 20 :d 20 :h 20})     ;; with overrides
+(sm/show my-box {:w 20} {:opacity 0.3})  ;; with display options
+#+end_src
+
+** =hide-model= / =show-model=
+
+Toggle model visibility in the scene.
+
+#+begin_src clojure
+(sm/hide-model 'my-box)
+(sm/show-model 'my-box)
+#+end_src
+
+** =set-opacity=
+
+Change a model's opacity after it has been added to the scene.
+
+#+begin_src clojure
+(sm/set-opacity 'my-box 0.5)
+#+end_src
+
+** =remove-model=
+
+Remove a model from the scene entirely.
+
+#+begin_src clojure
+(sm/remove-model 'my-box)
+#+end_src
+
+** =tag=
+
+Tag a sub-shape within a model body. Only works inside a =defmodel=
+body (uses a dynamic binding).
+
+#+begin_src clojure
+(defmodel joined [r]
+  (let [sph (kernel/make-sphere r)
+        box (kernel/make-box (* 2 r) (* 2 r) (* 2 r))]
+    {:shape sph
+     :tags {:sphere sph
+            :box box}}))
+#+end_src
+
+** =hide-tag= / =show-tag=
+
+Toggle visibility of tagged sub-shapes.
+
+#+begin_src clojure
+(sm/hide-tag 'joined :sphere)
+(sm/show-tag 'joined :sphere)
+#+end_src
+
+** =track= / =destroy= / =destroy-all=
+
+Manual lifecycle management for OpenCascade objects.
+
+#+begin_src clojure
+(kernel/destroy some-shape)
+(kernel/destroy-all)   ;; frees every tracked object
+#+end_src
+
+* REPL Workflow
+
+** 1. Install dependencies
+
+#+begin_src sh
+npm install
+#+end_src
+
+** 2. Start the shadow-cljs dev server
+
+#+begin_src sh
+npm run dev
+#+end_src
+
+This starts:
+- An nREPL server on **port 8777** (override via =NREPL_PORT= env var, e.g. =NREPL_PORT=9999 npm run dev=)
+- An HTTP dev server on **port 8700** serving =public/=
+
+** 3. Open the page in a browser
+
+Navigate to =http://localhost:8700=.
+
+This loads the compiled CLJS application, which:
+1. Calls =ClojCAD.core/init=
+2. Initializes the three-cad-viewer Display/Viewer
+3. Loads the OpenCascade.js WASM module
+4. Runs the demo
+
+The JavaScript runtime (including the OCCT kernel) is now live.
+
+** 4. Connect a REPL
+
+*** From VS Code (Calva)
+
+1. Run the =Calva: Connect to a Running REPL in the Project= command
+2. Select =shadow-cljs=
+3. Host: =localhost=, Port: =8777=
+4. Select the =:dev= build when prompted
+
+Alternatively, connect directly to the REPL port printed in the shadow-cljs output.
+
+*** From the terminal
+
+#+begin_src sh
+npx shadow-cljs cljs-repl :dev
+#+end_src
+
+This starts an interactive ClojureScript REPL in the terminal connected to the running browser tab.
+
+*** From Emacs with CIDER
+
+1. =M-x cider-connect-clj=
+2. Host: =localhost=
+3. Port: =8777=
+
+CIDER will connect to the shadow-cljs nREPL.
+
+** 5. Switch to the CLJS REPL
+
+In the =*cider-repl*= buffer, switch to the ClojureScript evaluation
+target:
+
+#+begin_src clojure
+(shadow.cljs.devtools.api/nrepl-select :dev)
+#+end_src
+
+Now you can evaluate ClojureScript forms against the running browser
+tab. For example:
+
+#+begin_src clojure
+(require '[ClojCAD.kernel.api :as kernel])
+(require '[ClojCAD.scene.manager :as sm])
+(require '[ClojCAD.demo :as demo])
+
+(kernel/make-sphere 5)
+(sm/show demo/sphere {:r 20})
+#+end_src
+
+The viewer in the browser will update in real time.
+
+* Troubleshooting
+
+** Closure compilation fails with "import.meta" errors
+
+If =npm run dev= fails with:
+
+#+begin_src text
+Closure compilation failed with 3 errors
+--- node_modules/opencascade_DOT_js/dist/cascadestudio.js
+This code cannot be transpiled. import.meta.
+#+end_src
+
+The =postinstall= script that patches =cascadestudio.js= likely didn't run.
+This happens when =node_modules= is restored from a cache
+or copied from another checkout without running =npm install=.
+
+Run the following commands manually:
+
+#+begin_src sh
+node scripts/patch-opencascade.js
+cp node_modules/opencascade.js/dist/cascadestudio.wasm public/
+cp node_modules/three-cad-viewer/dist/three-cad-viewer.css public/
+#+end_src
+
+Then clean the shadow-cljs cache and rebuild:
+
+#+begin_src sh
+rm -rf .shadow-cljs
+npm run dev
+#+end_src
+
+* Architecture
+
+The application is organized into several namespaces:
+
+- =ClojCAD.core= :: Entry point. Initializes the viewer and geometry
+     kernel, then starts the demo.
+- =ClojCAD.kernel.init= :: Loads the OpenCascade.js WASM module and
+     exposes the OCCT instance.
+- =ClojCAD.kernel.api= :: Public API surface — re-exports primitives,
+     tessellation, and lifecycle functions.
+- =ClojCAD.kernel.primitives= :: Wraps OCCT =BRepPrimAPI= constructors
+     for primitive shapes.
+- =ClojCAD.kernel.mesh= :: Tessellates B-Rep shapes into
+     vertex/normal/index buffers for rendering.
+- =ClojCAD.kernel.lifecycle= :: Tracks OpenCascade heap-allocated
+     objects so they can be freed.
+- =ClojCAD.model.defmodel= :: Macro that defines a parametric model
+     with reactive caching.
+- =ClojCAD.model.core= :: Creates a reactive model wrapper with
+     caching and tag support.
+- =ClojCAD.model.registry= :: Global registry of all defined models.
+- =ClojCAD.model.tag= :: Dynamic-binding-based sub-shape tagging
+     within model bodies.
+- =ClojCAD.scene.manager= :: Manages the scene: watches the =params=
+     atom, drives tessellation and viewer updates.
+- =ClojCAD.viewport.viewer= :: Wraps the three-cad-viewer Display and
+     Viewer classes.
+- =ClojCAD.viewport.shape-adapter= :: Converts tessellation data into
+     the viewer's shape format.
+
+Data flow:
+
+1. Model definitions register themselves in the model registry.
+2. The =params= atom holds current parameter values for every model.
+3. When =params= changes (via =reset! = swap! =), a watch fires and
+   recomputes only the models whose parameter keys changed.
+4. Each recomputed model is tessellated and pushed to the
+   three-cad-viewer scene.
