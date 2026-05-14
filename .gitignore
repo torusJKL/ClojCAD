@@ -2,3 +2,4 @@
 node_modules/
 public/js/
 public/opencascade.*
+public/cascadestudio.wasm

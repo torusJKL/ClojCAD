@@ -1,5 +1,5 @@
 {:source-paths ["src"]
- :dependencies [[reagent "1.2.0"]]
+ :dependencies []
  :builds
  {:dev
    {:target :browser
@@ -7,5 +7,5 @@
     :modules {:main {:init-fn CADscript.core/init}}
 
    :devtools {:http-port 8700
-            :http-root "public"
-            :nrepl-port 8777}}}}
+              :http-root "public"
+              :nrepl-port 8777}}}}

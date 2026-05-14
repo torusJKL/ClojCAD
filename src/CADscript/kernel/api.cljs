@@ -11,6 +11,8 @@
 
 (def make-sphere primitives/make-sphere)
 (def make-box primitives/make-box)
+(def make-cylinder primitives/make-cylinder)
+(def make-cone primitives/make-cone)
 
 (def tessellate mesh/tessellate)
 

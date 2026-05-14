@@ -1,26 +1,38 @@
 (ns CADscript.kernel.primitives
-  (:require ["three" :as three]))
+  (:require [CADscript.kernel.init :as init]
+            [CADscript.kernel.lifecycle :as lifecycle]))
 
-(defn- sphere-mesh-data [radius widthSeg heightSeg]
-  (let [geo (three/SphereGeometry. radius widthSeg heightSeg)
-        pos (.. geo -attributes -position -array)
-        idx (.getIndex geo)
-        vertices (vec (js/Array.from pos))
-        indices (vec (js/Array.from (.. idx -array)))]
-    (.dispose geo)
-    {:vertices vertices :indices indices}))
-
-(defn- box-mesh-data [w d h]
-  (let [geo (three/BoxGeometry. w d h)
-        pos (.. geo -attributes -position -array)
-        idx (.getIndex geo)
-        vertices (vec (js/Array.from pos))
-        indices (vec (js/Array.from (.. idx -array)))]
-    (.dispose geo)
-    {:vertices vertices :indices indices}))
+(defn- oc []
+  @init/oc-instance)
 
 (defn make-sphere [radius]
-  (sphere-mesh-data radius 24 16))
+  (let [ctor (.-BRepPrimAPI_MakeSphere_1 (oc))
+        builder (js/Reflect.construct ctor #js [radius])
+        shape (.Shape builder)]
+    (.delete builder)
+    (lifecycle/track shape)
+    shape))
 
 (defn make-box [dx dy dz]
-  (box-mesh-data dx dy dz))
+  (let [ctor (.-BRepPrimAPI_MakeBox_2 (oc))
+        builder (js/Reflect.construct ctor #js [dx dy dz])
+        shape (.Shape builder)]
+    (.delete builder)
+    (lifecycle/track shape)
+    shape))
+
+(defn make-cylinder [radius height]
+  (let [ctor (.-BRepPrimAPI_MakeCylinder_1 (oc))
+        builder (js/Reflect.construct ctor #js [radius height])
+        shape (.Shape builder)]
+    (.delete builder)
+    (lifecycle/track shape)
+    shape))
+
+(defn make-cone [radius1 radius2 height]
+  (let [ctor (.-BRepPrimAPI_MakeCone_1 (oc))
+        builder (js/Reflect.construct ctor #js [radius1 radius2 height])
+        shape (.Shape builder)]
+    (.delete builder)
+    (lifecycle/track shape)
+    shape))

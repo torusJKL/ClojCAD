@@ -11,9 +11,13 @@
             @cache-val
             (let [tags (atom {})]
               (binding [tag/*scene-context* tags]
-                (let [shape (f params)]
+                (let [result (f params)
+                      shape (if (map? result) (:shape result) result)
+                              tags-map (when (map? result) (:tags result))
+                              extra (when (map? result) (dissoc result :shape :tags))
+                              merged-tags (merge @tags tags-map)]
                   (reset! cache-key params)
-                  (reset! cache-val {:shape shape :tags @tags})
+                  (reset! cache-val (merge {:shape shape :tags merged-tags} extra))
                   @cache-val)))))]
     (registry/register! name {:fn model-fn :param-keys param-keys :opts opts})
     (with-meta model-fn
