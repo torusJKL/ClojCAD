@@ -1,6 +1,6 @@
 ## MODIFIED Requirements
 
-### Requirement: Kernel tessellates shapes to mesh data with full Shape metadata
+### Requirement: Kernel tessellates shapes to mesh data
 The system SHALL convert OCCT `TopoDS_Shape` objects to mesh data including per-face and per-edge metadata for the three-cad-viewer library.
 
 #### Scenario: Tessellate a shape with full metadata

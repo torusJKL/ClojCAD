@@ -8,6 +8,20 @@
 **Reason**: The library provides a built-in tree panel. The Reagent layer panel is no longer needed.
 **Migration**: The library's tree panel automatically shows models added via `addPart`. Remove `ui/layer_panel.cljs`. Tagged sub-geometry appears as hierarchical children.
 
+## ADDED Requirements
+
+### Requirement: Intermediate shapes appear as sub-layers
+The system SHALL use the library's hierarchical tree to display tagged intermediate geometry as collapsible children of their parent model.
+
+#### Scenario: Tagged shapes appear as sub-entries
+- **WHEN** a model uses `tag` to label intermediate geometry
+- **THEN** each tagged intermediate SHALL be added as a child part via `viewer.addPart("/<model-name>", childPart)`
+- **THEN** each tagged intermediate SHALL appear as a collapsible entry under its model in the tree panel
+
+#### Scenario: Tag visibility toggles
+- **WHEN** user toggles a tagged intermediate in the library tree panel
+- **THEN** the notification callback SHALL update the `scene` atom's `:tags-visible` map for that model and label
+
 ## MODIFIED Requirements
 
 ### Requirement: Scene manager coordinates model display
@@ -34,20 +48,8 @@ The system SHALL provide a scene manager that maintains a map of displayed model
 - **THEN** the `:opacity` option SHALL set the part's `alpha` field in the library Shape
 - **THEN** the `:color` option SHALL set the part's `color` field (if provided)
 
-### Requirement: Intermediate shapes appear as tree children
-The system SHALL use the library's hierarchical tree to display tagged intermediate geometry as collapsible children of their parent model.
-
-#### Scenario: Tagged shapes appear as sub-entries
-- **WHEN** a model uses `tag` to label intermediate geometry
-- **THEN** each tagged intermediate SHALL be added as a child part via `viewer.addPart("/<model-name>", childPart)`
-- **THEN** each tagged intermediate SHALL appear as a collapsible entry under its model in the tree panel
-
-#### Scenario: Tag visibility toggles
-- **WHEN** user toggles a tagged intermediate in the library tree panel
-- **THEN** the notification callback SHALL update the `scene` atom's `:tags-visible` map for that model and label
-
 ### Requirement: Reactive re-evaluation on param change
-(Unchanged from previous spec — the reactive watcher remains identical in logic.)
+The scene manager SHALL watch the shared params atom and re-evaluate dirty models. (Unchanged from previous spec — the reactive watcher remains identical in logic.)
 
 #### Scenario: Param change triggers re-evaluation
 - **WHEN** user evaluates `(swap! params assoc :r 20)`
