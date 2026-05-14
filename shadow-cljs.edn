@@ -1,5 +1,5 @@
 {:source-paths ["src"]
- :dependencies [[reagent "1.2.0"]]
+ :dependencies []
  :builds
  {:dev
    {:target :browser

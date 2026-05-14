@@ -3,17 +3,12 @@
             [CADscript.model.registry]
             [CADscript.model.tag]
             [CADscript.scene.manager :as sm]
-            [CADscript.viewport.scene :as vs]
-            [CADscript.viewport.controls :as vc]
-            [CADscript.viewport.render :as vr]
+            [CADscript.viewport.viewer :as vw]
             [CADscript.kernel.api :as kernel]
             [CADscript.demo :as demo]))
 
 (defn init []
-  (vs/init-viewport!)
-  (vc/init-controls!)
-  (sm/set-on-update! vr/update-viewport!)
-  (vr/start-loop!)
+  (vw/init-viewer!)
   (-> (kernel/init-kernel)
       (.then (fn [_]
                (demo/start-demo!)))
