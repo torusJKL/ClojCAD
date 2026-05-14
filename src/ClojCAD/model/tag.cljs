@@ -1,4 +1,4 @@
-(ns CADscript.model.tag)
+(ns ClojCAD.model.tag)
 
 (def ^:dynamic *scene-context* nil)
 

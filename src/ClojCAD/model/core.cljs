@@ -1,6 +1,6 @@
-(ns CADscript.model.core
-  (:require [CADscript.model.tag :as tag]
-            [CADscript.model.registry :as registry]))
+(ns ClojCAD.model.core
+  (:require [ClojCAD.model.tag :as tag]
+            [ClojCAD.model.registry :as registry]))
 
 (defn reactive-model [name param-keys f opts]
   (let [cache-key (atom ::empty)

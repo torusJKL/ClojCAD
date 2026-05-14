@@ -4,7 +4,7 @@
  {:dev
    {:target :browser
     :output-dir "public/js"
-    :modules {:main {:init-fn CADscript.core/init}}
+    :modules {:main {:init-fn ClojCAD.core/init}}
 
    :devtools {:http-port 8700
               :http-root "public"

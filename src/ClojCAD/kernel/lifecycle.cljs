@@ -1,4 +1,4 @@
-(ns CADscript.kernel.lifecycle)
+(ns ClojCAD.kernel.lifecycle)
 
 (defonce tracked (atom #{}))
 

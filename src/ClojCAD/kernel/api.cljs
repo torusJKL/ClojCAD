@@ -1,8 +1,8 @@
-(ns CADscript.kernel.api
-  (:require [CADscript.kernel.init :as init]
-            [CADscript.kernel.primitives :as primitives]
-            [CADscript.kernel.mesh :as mesh]
-            [CADscript.kernel.lifecycle :as lifecycle]))
+(ns ClojCAD.kernel.api
+  (:require [ClojCAD.kernel.init :as init]
+            [ClojCAD.kernel.primitives :as primitives]
+            [ClojCAD.kernel.mesh :as mesh]
+            [ClojCAD.kernel.lifecycle :as lifecycle]))
 
 (def init-kernel init/init-kernel)
 (def oc-instance init/oc-instance)

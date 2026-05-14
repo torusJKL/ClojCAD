@@ -1,4 +1,4 @@
-(ns CADscript.viewport.shape-adapter)
+(ns ClojCAD.viewport.shape-adapter)
 
 (defn tessellation->shape [{:keys [vertices normals indices edges]}]
   (let [s (js-obj)]

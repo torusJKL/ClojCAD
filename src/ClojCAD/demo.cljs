@@ -1,8 +1,8 @@
-(ns CADscript.demo
-  (:require [CADscript.kernel.api :as kernel]
-            [CADscript.scene.manager :as sm]
-            [CADscript.model.core :as model])
-  (:require-macros [CADscript.model.defmodel :refer [defmodel]]))
+(ns ClojCAD.demo
+  (:require [ClojCAD.kernel.api :as kernel]
+            [ClojCAD.scene.manager :as sm]
+            [ClojCAD.model.core :as model])
+  (:require-macros [ClojCAD.model.defmodel :refer [defmodel]]))
 
 (def params sm/params)
 

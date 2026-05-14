@@ -1,8 +1,8 @@
-(ns CADscript.scene.manager
-  (:require [CADscript.model.registry :as reg]
-            [CADscript.kernel.api :as kernel]
-            [CADscript.viewport.viewer :as vw]
-            [CADscript.viewport.shape-adapter :as sa]))
+(ns ClojCAD.scene.manager
+  (:require [ClojCAD.model.registry :as reg]
+            [ClojCAD.kernel.api :as kernel]
+            [ClojCAD.viewport.viewer :as vw]
+            [ClojCAD.viewport.shape-adapter :as sa]))
 
 (defonce params (atom {}))
 (defonce scene (atom {}))

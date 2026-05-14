@@ -1,7 +1,7 @@
-(ns CADscript.kernel.mesh)
+(ns ClojCAD.kernel.mesh)
 
 (defn- oc []
-  @(.-oc_instance (js* "CADscript.kernel.init")))
+  @(.-oc_instance (js* "ClojCAD.kernel.init")))
 
 (defn- empty-result []
   {:vertices (js/Float32Array. 0) :normals (js/Float32Array. 0)

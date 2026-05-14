@@ -1,6 +1,6 @@
-(ns CADscript.kernel.primitives
-  (:require [CADscript.kernel.init :as init]
-            [CADscript.kernel.lifecycle :as lifecycle]))
+(ns ClojCAD.kernel.primitives
+  (:require [ClojCAD.kernel.init :as init]
+            [ClojCAD.kernel.lifecycle :as lifecycle]))
 
 (defn- oc []
   @init/oc-instance)
