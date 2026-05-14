@@ -10,6 +10,7 @@
     "shadow-cljs": "^2.28.0"
   },
   "scripts": {
+    "dev": "node scripts/start-dev.js",
     "postinstall": "node scripts/patch-opencascade.js && cp node_modules/opencascade.js/dist/cascadestudio.wasm public/ && cp node_modules/three-cad-viewer/dist/three-cad-viewer.css public/"
   }
 }
