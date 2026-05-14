@@ -185,6 +185,37 @@ tab. For example:
 
 The viewer in the browser will update in real time.
 
+* Troubleshooting
+
+** Closure compilation fails with "import.meta" errors
+
+If =npm run dev= fails with:
+
+#+begin_src text
+Closure compilation failed with 3 errors
+--- node_modules/opencascade_DOT_js/dist/cascadestudio.js
+This code cannot be transpiled. import.meta.
+#+end_src
+
+The =postinstall= script that patches =cascadestudio.js= likely didn't run.
+This happens when =node_modules= is restored from a cache
+or copied from another checkout without running =npm install=.
+
+Run the following commands manually:
+
+#+begin_src sh
+node scripts/patch-opencascade.js
+cp node_modules/opencascade.js/dist/cascadestudio.wasm public/
+cp node_modules/three-cad-viewer/dist/three-cad-viewer.css public/
+#+end_src
+
+Then clean the shadow-cljs cache and rebuild:
+
+#+begin_src sh
+rm -rf .shadow-cljs
+npm run dev
+#+end_src
+
 * Architecture
 
 The application is organized into several namespaces:
