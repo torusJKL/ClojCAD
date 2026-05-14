@@ -1,4 +1,4 @@
-(ns CADscript.viewport.viewer
+(ns ClojCAD.viewport.viewer
   (:require ["three-cad-viewer" :refer (Display Viewer)]))
 
 (defonce *viewer (atom nil))

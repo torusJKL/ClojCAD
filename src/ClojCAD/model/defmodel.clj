@@ -1,4 +1,4 @@
-(ns CADscript.model.defmodel)
+(ns ClojCAD.model.defmodel)
 
 (defn- extract-keys [params]
   (if (map? (first params))
@@ -13,6 +13,6 @@
                           params)
         param-keys (extract-keys params)]
     (list 'def name
-      (list 'CADscript.model.core/reactive-model (list 'quote name) param-keys
+      (list 'ClojCAD.model.core/reactive-model (list 'quote name) param-keys
         (cons 'fn (cons expanded-params body))
         opts))))

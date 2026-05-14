@@ -1,4 +1,4 @@
-(ns CADscript.kernel.init
+(ns ClojCAD.kernel.init
   (:require ["opencascade.js" :default init-oc]))
 
 (defonce oc-instance (atom nil))

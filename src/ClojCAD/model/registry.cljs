@@ -1,4 +1,4 @@
-(ns CADscript.model.registry)
+(ns ClojCAD.model.registry)
 
 (defonce models (atom {}))
 
