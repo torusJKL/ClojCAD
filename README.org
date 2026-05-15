@@ -74,7 +74,8 @@ original is unchanged.
 
 ** =tessellate=
 
-Convert a =TopoDS_Shape= into renderable mesh data (typed arrays).
+Convert a =TopoDS_Shape= into renderable mesh data (typed arrays),
+including edge line segments for the viewer's edge overlay.
 
 #+begin_src clojure
 (kernel/tessellate shape)             ;; default deviation 0.1
@@ -277,7 +278,7 @@ The application is organized into several namespaces:
      =BooleanCommon=, =BooleanCut= helpers for CSG operations
      on shapes.
 - =ClojCAD.kernel.mesh= :: Tessellates B-Rep shapes into
-     vertex/normal/index buffers for rendering.
+     vertex/normal/index/edge buffers for rendering.
 - =ClojCAD.kernel.lifecycle= :: Tracks OpenCascade heap-allocated
      objects so they can be freed.
 - =ClojCAD.model.defmodel= :: Macro that defines a parametric model

@@ -31,6 +31,7 @@ The system SHALL convert the kernel's tessellation output to the `three-cad-view
 - **THEN** the adapter SHALL rename `:indices` to `:triangles`
 - **THEN** the adapter SHALL produce a `Shape` object with all 9 fields matching the library's schema
 - **THEN** the adapter SHALL convert CLJS keyword keys to JS string keys
+- **THEN** the `edges` field SHALL be a `Float32Array` with connected line segment format (every 6 floats = one segment)
 
 ### Requirement: Scene manager calls Viewer API for rendering
 
