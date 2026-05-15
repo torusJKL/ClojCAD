@@ -6,6 +6,7 @@
 
 (defonce params (atom {}))
 (defonce scene (atom {}))
+(defonce current-model (atom nil))
 
 (defn- model-path [name]
   (str "/root/" name))
@@ -82,13 +83,15 @@
              tags (reduce-kv (fn [m k v] (assoc m k (kernel/tessellate v))) {} (:tags result))
              tags-visible (zipmap (keys tags) (repeat true))
              part (sa/build-part name-str mesh (merge opts display-opts))]
-         (swap! scene assoc name-str
-           {:mesh mesh
-            :tags tags
-            :tag-pos tag-pos
-            :tags-visible tags-visible
-            :opts (merge opts display-opts)
-            :visible? true})
+          (swap! scene assoc name-str
+            {:occt-shape (:shape result)
+             :mesh mesh
+             :tags tags
+             :tag-pos tag-pos
+             :tags-visible tags-visible
+             :opts (merge opts display-opts)
+             :visible? true})
+          (reset! current-model name-str)
           (if @vw/*rendered?
             (when viewer
               (if (seq tags)
@@ -109,14 +112,15 @@
               (when (not (seq tags))
                 (aset model-part "id" (str "/root/" name-str)))
               (vw/render-initial! shapes))))
-        (catch :default e
-         (swap! scene assoc name-str
-           {:mesh nil
-            :tags {}
-            :tags-visible {}
-            :opts (merge opts display-opts)
-            :visible? true
-            :error (str e)}))))))
+         (catch :default e
+          (swap! scene assoc name-str
+            {:occt-shape nil
+             :mesh nil
+             :tags {}
+             :tags-visible {}
+             :opts (merge opts display-opts)
+             :visible? true
+             :error (str e)}))))))
 
 (defn hide-model [model-name]
   (let [name-str (name model-name)

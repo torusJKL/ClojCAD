@@ -1,5 +1,6 @@
 (ns ClojCAD.viewport.viewer
-  (:require ["three-cad-viewer" :refer (Display Viewer)]))
+  (:require ["three-cad-viewer" :refer (Display Viewer)]
+            [ClojCAD.viewport.export-ui :as export-ui]))
 
 (defonce *viewer (atom nil))
 (defonce *display (atom nil))
@@ -42,6 +43,7 @@
                   notify-callback)]
     (reset! *display display)
     (reset! *viewer viewer)
+    (export-ui/mount-export-button! display)
     (js/window.addEventListener "resize" update-size!)
     viewer))
 

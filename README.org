@@ -141,6 +141,38 @@ Toggle visibility of tagged sub-shapes.
 (sm/show-tag 'joined :sphere)
 #+end_src
 
+** Export
+
+Export a shape to STL (binary) or STEP (AP203) from the REPL:
+
+#+begin_src clojure
+;; STL export (binary, default max-deviation 0.02)
+(kernel/export-stl shape "output.stl")
+
+;; Finer STL resolution
+(kernel/export-stl shape "output.stl" {:max-deviation 0.01})
+
+;; STEP export (AP203 format)
+(kernel/export-step shape "output.step")
+#+end_src
+
+*** Export via UI
+
+An Export button (download arrow icon) in the viewer toolbar provides
+one-click STL / STEP export of the currently displayed model.
+The filename is auto-generated from the model name.
+
+Export resolution is adjustable from the browser console:
+
+#+begin_src js
+setExportQuality(0.01)   ;; finer mesh = rounder shapes, larger files
+setExportQuality(0.02)   ;; default
+setExportQuality(0.1)    ;; coarser mesh, smaller files
+#+end_src
+
+The value is the =max-deviation= parameter passed to
+=BRepMesh_IncrementalMesh= (lower = finer).
+
 ** =track= / =destroy= / =destroy-all=
 
 Manual lifecycle management for OpenCascade objects.
@@ -293,6 +325,12 @@ The application is organized into several namespaces:
      Viewer classes.
 - =ClojCAD.viewport.shape-adapter= :: Converts tessellation data into
      the viewer's shape format.
+- =ClojCAD.viewport.export-ui= :: Export dropdown button mounted in the
+     toolbar. Exposes =setExportQuality(deviation)= and
+     =setViewerTheme("light"|"dark")= on =window= for the browser console.
+- =ClojCAD.kernel.export= :: Wraps STL and STEP export via
+     OCCT =StlAPI_Writer= (binary STL written directly from mesh data)
+     and =STEPControl_Writer_1= (AP203 STEP via OCCT WASM).
 
 Data flow:
 
