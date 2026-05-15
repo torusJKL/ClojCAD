@@ -24,18 +24,19 @@
           (let [cast (.-TopoDS_Cast oc-inst)
                 my-edge (.Edge_1 cast edge)
                 adaptor (js/Reflect.construct (.-BRepAdaptor_Curve_2 oc-inst) #js [my-edge])
-                curve-type (.GetCurveType adaptor)
+                curve-type (.GetType adaptor)
                 sampler (js/Reflect.construct (.-GCPnts_TangentialDeflection_2 oc-inst) #js [adaptor maxDeviation 0.1 2 1.0e-9 1.0e-7])
                 np (.NbPoints sampler)]
             (.push edge-types curve-type)
-            (.push segments-per-edge np)
-            (loop [pi 1]
-              (when (<= pi np)
-                (let [pt (.Value sampler pi)]
-                  (.push out (.X pt))
-                  (.push out (.Y pt))
-                  (.push out (.Z pt))
-                  (recur (inc pi))))))
+            (.push segments-per-edge (dec np))
+            (when (pos? np)
+              (loop [pi 1 prev nil]
+                (when (<= pi np)
+                  (let [pt (.Value sampler pi)]
+                    (when prev
+                      (.push out (.X prev)) (.push out (.Y prev)) (.push out (.Z prev))
+                      (.push out (.X pt)) (.push out (.Y pt)) (.push out (.Z pt)))
+                    (recur (inc pi) pt))))))
           (catch :default _))
         (.Next explorer)))
     {:points out :edge-types edge-types :segments-per-edge segments-per-edge}))
@@ -103,9 +104,9 @@
        (let [oc-inst (oc)]
          (js/Reflect.construct (.-BRepMesh_IncrementalMesh_2 oc-inst)
            #js [shape maxDeviation false (* maxDeviation 5) false])
-         (let [{:keys [vertices normals indices obj-vertices face-types triangles-per-face]} (extract-faces shape)
-               {:keys [points edge-types segments-per-edge]} (extract-edges shape maxDeviation)]
-           {:vertices (js/Float32Array.from vertices)
+          (let [{:keys [vertices normals indices obj-vertices face-types triangles-per-face]} (extract-faces shape)
+                {:keys [points edge-types segments-per-edge]} (extract-edges shape maxDeviation)]
+            {:vertices (js/Float32Array.from vertices)
             :normals (js/Float32Array.from normals)
             :indices (js/Uint32Array.from indices)
             :edges (if (pos? (.-length points))
