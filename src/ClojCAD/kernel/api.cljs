@@ -1,6 +1,7 @@
 (ns ClojCAD.kernel.api
   (:require [ClojCAD.kernel.init :as init]
             [ClojCAD.kernel.primitives :as primitives]
+            [ClojCAD.kernel.booleans :as booleans]
             [ClojCAD.kernel.mesh :as mesh]
             [ClojCAD.kernel.lifecycle :as lifecycle]))
 
@@ -13,6 +14,13 @@
 (def make-box primitives/make-box)
 (def make-cylinder primitives/make-cylinder)
 (def make-cone primitives/make-cone)
+
+(def translate primitives/translate)
+(def rotate primitives/rotate)
+
+(def fuse booleans/fuse)
+(def common booleans/common)
+(def cut booleans/cut)
 
 (def tessellate mesh/tessellate)
 

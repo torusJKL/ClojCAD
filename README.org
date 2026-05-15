@@ -27,6 +27,51 @@ All primitives return an OpenCascade =TopoDS_Shape=.
 (kernel/make-cone 5 10 15)        ;; radius1 radius2 height
 #+end_src
 
+** Boolean Operations
+
+Combine two or more shapes into a single shape via CSG operations. All
+functions accept variadic arguments = (a b & more)= and chain
+left-to-right. If any step fails (e.g. non-overlapping common) they
+return =nil=.
+
+#+begin_src clojure
+(kernel/fuse  a b)                     ;; union: a ∪ b
+(kernel/fuse  a b c)                   ;; union: (a ∪ b) ∪ c
+(kernel/cut   a b)                     ;; difference: a − b
+(kernel/cut   a b c)                   ;; difference: (a − b) − c
+(kernel/common a b)                    ;; intersection: a ∩ b
+(kernel/common a b c)                  ;; intersection: (a ∩ b) ∩ c
+#+end_src
+
+Examples with primitives:
+
+#+begin_src clojure
+(defmodel with-hole [r w d h]
+  (let [box (kernel/make-box w d h)
+        cylinder (kernel/make-cylinder r (* 2 h))]
+    (kernel/cut box cylinder)))
+
+(defmodel intersected [r w d h]
+  (let [sphere (kernel/make-sphere r)
+        box    (kernel/make-box w d h)]
+    (kernel/common sphere box)))
+
+(defmodel combined [r]
+  (let [a (kernel/make-sphere r)
+        b (kernel/translate (kernel/make-sphere r) (* 1.5 r) 0 0)]
+    (kernel/fuse a b)))
+#+end_src
+
+** Transforms
+
+Move and rotate shapes in 3D space. Both return a new shape; the
+original is unchanged.
+
+#+begin_src clojure
+(kernel/translate shape x y z)         ;; move by (x, y, z)
+(kernel/rotate shape axis-x axis-y axis-z degrees)  ;; rotate around axis by degrees
+#+end_src
+
 ** =tessellate=
 
 Convert a =TopoDS_Shape= into renderable mesh data (typed arrays).
@@ -225,9 +270,12 @@ The application is organized into several namespaces:
 - =ClojCAD.kernel.init= :: Loads the OpenCascade.js WASM module and
      exposes the OCCT instance.
 - =ClojCAD.kernel.api= :: Public API surface — re-exports primitives,
-     tessellation, and lifecycle functions.
+     booleans, tessellation, lifecycle, and transform functions.
 - =ClojCAD.kernel.primitives= :: Wraps OCCT =BRepPrimAPI= constructors
-     for primitive shapes.
+     for primitive shapes. Also exposes =translate= via =gp_Trsf=.
+- =ClojCAD.kernel.booleans= :: Wraps OCCT =OCJS.BooleanFuse=,
+     =BooleanCommon=, =BooleanCut= helpers for CSG operations
+     on shapes.
 - =ClojCAD.kernel.mesh= :: Tessellates B-Rep shapes into
      vertex/normal/index buffers for rendering.
 - =ClojCAD.kernel.lifecycle= :: Tracks OpenCascade heap-allocated

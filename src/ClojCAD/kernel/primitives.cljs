@@ -36,3 +36,29 @@
     (.delete builder)
     (lifecycle/track shape)
     shape))
+
+(defn- with-trsf [shape f]
+  (let [trsf (js/Reflect.construct (.-gp_Trsf_1 (oc)) #js [])
+        _ (f trsf)
+        loc (js/Reflect.construct (.-TopLoc_Location_4 (oc)) #js [trsf])
+        moved (.Moved shape loc false)]
+    (lifecycle/track moved)
+    moved))
+
+(defn translate [shape x y z]
+  (with-trsf shape
+    (fn [trsf]
+      (.SetTranslation_1 trsf
+        (js/Reflect.construct (.-gp_Vec_4 (oc)) #js [x y z])))))
+
+(defn rotate [shape axis-x axis-y axis-z degrees]
+  (with-trsf shape
+    (fn [trsf]
+      (.SetRotation_1 trsf
+        (js/Reflect.construct (.-gp_Ax1_2 (oc)) #js [
+          (js/Reflect.construct (.-gp_Pnt_3 (oc)) #js [0 0 0])
+          (js/Reflect.construct (.-gp_Dir_3 (oc)) #js [
+            (js/Reflect.construct (.-gp_Vec_4 (oc)) #js [axis-x axis-y axis-z])
+          ])
+        ])
+        (* degrees 0.0174533)))))
