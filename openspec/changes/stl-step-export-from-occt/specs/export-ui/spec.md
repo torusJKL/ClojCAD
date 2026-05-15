@@ -31,6 +31,21 @@ The system SHALL call the kernel export function corresponding to the selected f
 - **WHEN** the user clicks an export option and no shape is currently displayed
 - **THEN** the system SHALL NOT attempt to export
 - **THEN** the system SHALL log a warning
+- **THEN** a visible error notification SHALL appear in the viewport
+
+#### Scenario: No shape data for current model
+- **WHEN** the user clicks an export option and the current model has no OCCT shape data
+- **THEN** the system SHALL NOT attempt to export
+- **THEN** a visible error notification SHALL appear in the viewport
+
+### Requirement: Loading indicator during export
+The system SHALL display a loading overlay while an export operation is in progress.
+
+#### Scenario: Loading overlay shows during export processing
+- **WHEN** the user clicks an export option
+- **THEN** a loading overlay SHALL appear over the viewport
+- **WHEN** the export completes or fails
+- **THEN** the loading overlay SHALL be removed
 
 ### Requirement: Export button is mounted after viewer initialization
 The system SHALL add the Export dropdown button to the toolbar after the three-cad-viewer Display is constructed.

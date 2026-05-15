@@ -4,6 +4,7 @@
             [ClojCAD.kernel.booleans :as booleans]
             [ClojCAD.kernel.mesh :as mesh]
             [ClojCAD.kernel.export :as export]
+            [ClojCAD.kernel.import :as import]
             [ClojCAD.kernel.lifecycle :as lifecycle]))
 
 (def init-kernel init/init-kernel)
@@ -27,6 +28,9 @@
 
 (def export-stl export/export-stl)
 (def export-step export/export-step)
+
+(def import-stl import/import-stl)
+(def import-step import/import-step)
 
 (def track lifecycle/track)
 (def destroy lifecycle/destroy)

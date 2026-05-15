@@ -1,5 +1,6 @@
 (ns ClojCAD.viewport.export-ui
-  (:require [ClojCAD.kernel.api :as kernel]))
+  (:require [ClojCAD.kernel.api :as kernel]
+            [ClojCAD.viewport.loading :as loading]))
 
 (defonce *export-ui (atom nil))
 (defonce *export-quality (atom {:max-deviation 0.02}))
@@ -20,20 +21,32 @@
                (not (.contains (:dropdown ui) (.-target e))))
       (close-dropdown!))))
 
+(defn- do-export! [format shape filename opts]
+  (loading/show-loading!)
+  (js/setTimeout
+    (fn []
+      (try
+        (case format
+          "stl" (kernel/export-stl shape filename opts)
+          "step" (kernel/export-step shape filename opts))
+        (finally
+          (loading/hide-loading!))))
+    50))
+
 (defn- on-export! [format]
   (close-dropdown!)
   (let [{:keys [scene current-model]} (scene-data)]
     (if (nil? current-model)
-      (js/console.warn "export-ui: no model displayed")
+      (do (js/console.warn "export-ui: no model displayed")
+          (loading/notify! "No model to export"))
       (let [entry (get scene current-model)
             shape (:occt-shape entry)]
         (if (nil? shape)
-          (js/console.warn (str "export-ui: no shape found for " current-model))
+          (do (js/console.warn (str "export-ui: no shape found for " current-model))
+              (loading/notify! "No shape data for current model"))
           (let [filename (str current-model "." format)
                 opts @*export-quality]
-            (case format
-              "stl" (kernel/export-stl shape filename opts)
-              "step" (kernel/export-step shape filename opts))))))))
+            (do-export! format shape filename opts)))))))
 
 (defn- make-dropdown-item [label format]
   (let [item (js/document.createElement "div")]
@@ -64,10 +77,14 @@
       (let [help-btn (.querySelector toolbar ".tcv_button_help")
             ref-node (when help-btn (.closest help-btn ".tcv_tooltip"))
             container (js/document.createElement "div")
+            tooltip-wrap (js/document.createElement "span")
             button (js/document.createElement "button")
             dropdown (js/document.createElement "div")]
         (set! (.. container -style -position) "relative")
         (set! (.. container -style -display) "inline-block")
+        (set! (.-className tooltip-wrap) "tcv_tooltip")
+        (.setAttribute tooltip-wrap "data-tooltip" "Export")
+        (.setAttribute tooltip-wrap "data-base-tooltip" "Export")
         (set! (.-className button) "tcv_btn tcv_btn_highlight tcv_round")
         (set! (.. button -style -padding) "0 6px")
         (set! (.. button -style -height) "28px")
@@ -76,12 +93,13 @@
         (set! (.. button -style -alignItems) "center")
         (set! (.. button -style -justifyContent) "center")
         (.appendChild button (download-svg))
+        (.appendChild tooltip-wrap button)
         (set! (.-className dropdown) "tcv_dropdown-content tcv_round")
         (set! (.. dropdown -style -minWidth) "160px")
         (if ref-node
           (.insertBefore toolbar container ref-node)
           (.appendChild toolbar container))
-        (.appendChild container button)
+        (.appendChild container tooltip-wrap)
         (.appendChild container dropdown)
         (.appendChild dropdown (make-dropdown-item "Export STL (.stl)" "stl"))
         (.appendChild dropdown (make-dropdown-item "Export STEP (.step)" "step"))
