@@ -20,9 +20,10 @@
 (defn get-default-shape-color []
   @*default-shape-color)
 
-(set! (.-setShapeColor js/window)
-  (fn [color]
-    (set-default-shape-color! color)))
+(when (and (exists? js/window) (not (undefined? js/window)))
+  (set! (.-setShapeColor js/window)
+    (fn [color]
+      (set-default-shape-color! color))))
 
 (defn load-config! []
   (-> (js/fetch "config.edn")

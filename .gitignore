@@ -4,3 +4,4 @@ public/js/
 public/opencascade.*
 public/cascadestudio.wasm
 public/three-cad-viewer.css
+target/

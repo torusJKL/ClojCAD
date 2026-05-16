@@ -376,3 +376,72 @@ Data flow:
    recomputes only the models whose parameter keys changed.
 4. Each recomputed model is tessellated and pushed to the
    three-cad-viewer scene.
+
+* Testing
+
+** Running Tests
+
+Run the full test suite (Node.js based, no browser needed):
+
+#+begin_src sh
+npm test
+#+end_src
+
+This compiles and runs all ClojureScript tests via shadow-cljs's
+=:target :node-script= build.
+
+** Test Organization
+
+Tests live in =test/= mirroring the =src/= structure. Each source
+file has a corresponding test file:
+
+| Source file                            | Test file                                     |
+|----------------------------------------+-----------------------------------------------|
+| =src/ClojCAD/kernel/lifecycle.cljs=    | =test/ClojCAD/kernel/lifecycle_test.cljs=    |
+| =src/ClojCAD/model/registry.cljs=      | =test/ClojCAD/model/registry_test.cljs=      |
+| =src/ClojCAD/model/tag.cljs=           | =test/ClojCAD/model/tag_test.cljs=           |
+| =src/ClojCAD/model/core.cljs=          | =test/ClojCAD/model/core_test.cljs=          |
+| =src/ClojCAD/scene/manager.cljs=       | =test/ClojCAD/scene/manager_test.cljs=       |
+| =src/ClojCAD/viewport/shape-adapter.cljs= | =test/ClojCAD/viewport/shape_adapter_test.cljs= |
+| =src/ClojCAD/viewport/config.cljs=     | =test/ClojCAD/viewport/config_test.cljs=     |
+
+** WASM-dependent Tests
+
+Tests for the kernel layer (primitives, booleans, mesh, export,
+import) require the OpenCascade.js WASM module. These tests are
+defined in:
+
+- =test/ClojCAD/kernel/init_test.cljs=
+- =test/ClojCAD/kernel/primitives_test.cljs=
+- =test/ClojCAD/kernel/booleans_test.cljs=
+- =test/ClojCAD/kernel/mesh_test.cljs=
+
+Currently, these tests must be run from a browser-connected REPL
+rather than via =npm test=, because the WASM module's file
+resolution differs between Node.js and the browser. To run them:
+
+1. Start the dev server: =npm run dev=
+2. Connect a REPL (see REPL Workflow above)
+3. Evaluate:
+
+#+begin_src clojure
+(require '[cljs.test :refer [run-tests]])
+(run-tests 'ClojCAD.kernel.init-test)
+(run-tests 'ClojCAD.kernel.primitives-test)
+;; etc.
+#+end_src
+
+** Writing New Tests
+
+Tests use =cljs.test= (bundled with ClojureScript).
+
+#+begin_src clojure
+(ns ClojCAD.my-ns-test
+  (:require [cljs.test :refer [deftest is]]))
+
+(deftest my-test-name
+  (is (= 1 1)))
+#+end_src
+
+After creating a new test file, add its namespace to
+=test/clojcad/runner.cljs= so it runs with =npm test=.

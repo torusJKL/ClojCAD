@@ -11,6 +11,8 @@
   },
   "scripts": {
     "dev": "node scripts/start-dev.js",
+    "test": "npx shadow-cljs compile test && node target/test/runner.js",
+    "test:watch": "npx shadow-cljs watch test",
     "postinstall": "node scripts/patch-opencascade.js && cp node_modules/opencascade.js/dist/cascadestudio.wasm public/ && cp node_modules/three-cad-viewer/dist/three-cad-viewer.css public/"
   }
 }
