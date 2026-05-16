@@ -4,6 +4,7 @@
    [ClojCAD.kernel.init :as init]
    ;; Non-WASM tests
    [ClojCAD.kernel.lifecycle-test]
+   [ClojCAD.kernel.font-test]
    [ClojCAD.model.registry-test]
    [ClojCAD.model.tag-test]
    [ClojCAD.model.core-test]
@@ -14,6 +15,7 @@
    ;; WASM-dependent tests
    [ClojCAD.kernel.init-test]
    [ClojCAD.kernel.primitives-test]
+   [ClojCAD.kernel.text3d-test]
    [ClojCAD.kernel.booleans-test]
    [ClojCAD.kernel.mesh-test]
    [ClojCAD.kernel.export-test]
@@ -26,6 +28,7 @@
   (println "--- Running non-WASM tests ---")
   (run-tests
    'ClojCAD.kernel.lifecycle-test
+   'ClojCAD.kernel.font-test
    'ClojCAD.model.registry-test
    'ClojCAD.model.tag-test
    'ClojCAD.model.core-test
@@ -38,6 +41,7 @@
         (run-tests
          'ClojCAD.kernel.init-test
          'ClojCAD.kernel.primitives-test
+         'ClojCAD.kernel.text3d-test
          'ClojCAD.kernel.booleans-test
          'ClojCAD.kernel.mesh-test
          'ClojCAD.kernel.export-test

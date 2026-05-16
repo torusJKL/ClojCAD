@@ -25,11 +25,57 @@ with =:opacity=.
 All primitives return an OpenCascade =TopoDS_Shape=.
 
 #+begin_src clojure
-(kernel/make-sphere 10)           ;; radius
-(kernel/make-box 15 15 15)        ;; dx dy dz
-(kernel/make-cylinder 5 20)       ;; radius height
-(kernel/make-cone 5 10 15)        ;; radius1 radius2 height
+(kernel/make-sphere 10)               ;; radius
+(kernel/make-box 15 15 15)            ;; dx dy dz
+(kernel/make-box 15 15 15 true)       ;; dx dy dz centered? - centers at origin
+(kernel/make-cylinder 5 20)           ;; radius height
+(kernel/make-cylinder 5 20 true)      ;; radius height centered? - centers at origin
+(kernel/make-cone 5 10 15)            ;; radius1 radius2 height
+(kernel/make-circle 5)                ;; radius -> face (for Extrude)
+(kernel/make-circle 5 true)           ;; radius wire? -> wire (for Loft/Pipe)
+(kernel/make-polygon [[0 0] [10 0] [10 10] [0 10]])  ;; points -> face
+(kernel/make-polygon [[0 0] [10 0] [10 10] [0 10]] true)  ;; points wire? -> wire
+(kernel/extrude face [0 0 10])                      ;; extrude face along vector -> solid
+(kernel/text3d "Hello" 36)                          ;; 3D text, defaults to Cousine font
+(kernel/text3d "Hello" 36 :font "Cousine-Bold" :height 0.2)  ;; custom font and depth
 #+end_src
+
+** Fonts
+
+The system bundles the Cousine font (Regular, Bold, Italic, BoldItalic)
+under Apache 2.0 license. Additional fonts can be loaded from URLs or
+placed in the =public/fonts/= directory and referenced by URL path.
+
+#+begin_src clojure
+(kernel/list-fonts)                              ;; list all registered font names
+(kernel/font-info "Cousine")                     ;; inspect font metadata
+(kernel/load-font! "MyFont" "/fonts/MyFont.ttf")     ;; synchronous — blocks until ready
+(kernel/register-font! "MyFont" "https://...")       ;; async — returns a promise
+(kernel/register-font! "MyFont" "/fonts/MyFont.ttf") ;; async version (same for URL or path)
+#+end_src
+
+Two loading options:
+
+- **=load-font!=( recommended)** — Uses a synchronous XHR request. Blocks until the font is
+  fetched and parsed. Returns the font object (or =nil= on failure). After this call returns,
+  the font is immediately available for =text3d= with no async gap.
+  
+  #+begin_src clojure
+  (kernel/load-font! "Mine" "/fonts/Mine.ttf")
+  (kernel/text3d "Hi" 36 :font "Mine")  ;; works immediately
+  #+end_src
+
+- **=register-font!=( promise-based)** — Uses =fetch=, returns a promise. The font is stored
+  in IndexedDB and survives page reloads. If =text3d= is called before the promise resolves,
+  it returns =nil=.
+
+  #+begin_src clojure
+  (-> (kernel/register-font! "Mine" "/fonts/Mine.ttf")
+      (.then (fn [_] (kernel/text3d "Hi" 36 :font "Mine"))))
+  #+end_src
+
+Use =load-font!= when you need the font immediately and don't want to chain promises.
+Use =register-font!= when you want IndexedDB persistence across page reloads.
 
 ** Boolean Operations
 
@@ -398,6 +444,7 @@ file has a corresponding test file:
 | Source file                            | Test file                                     |
 |----------------------------------------+-----------------------------------------------|
 | =src/ClojCAD/kernel/lifecycle.cljs=    | =test/ClojCAD/kernel/lifecycle_test.cljs=    |
+| =src/ClojCAD/kernel/font.cljs=         | =test/ClojCAD/kernel/font_test.cljs=         |
 | =src/ClojCAD/model/registry.cljs=      | =test/ClojCAD/model/registry_test.cljs=      |
 | =src/ClojCAD/model/tag.cljs=           | =test/ClojCAD/model/tag_test.cljs=           |
 | =src/ClojCAD/model/core.cljs=          | =test/ClojCAD/model/core_test.cljs=          |
@@ -415,6 +462,7 @@ defined in:
 - =test/ClojCAD/kernel/primitives_test.cljs=
 - =test/ClojCAD/kernel/booleans_test.cljs=
 - =test/ClojCAD/kernel/mesh_test.cljs=
+- =test/ClojCAD/kernel/text3d_test.cljs=
 
 Currently, these tests must be run from a browser-connected REPL
 rather than via =npm test=, because the WASM module's file
