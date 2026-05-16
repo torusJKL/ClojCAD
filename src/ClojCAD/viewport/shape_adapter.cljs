@@ -1,4 +1,5 @@
-(ns ClojCAD.viewport.shape-adapter)
+(ns ClojCAD.viewport.shape-adapter
+  (:require [ClojCAD.viewport.config :as cfg]))
 
 (defn tessellation->shape [{:keys [vertices normals indices edges]}]
   (let [s (js-obj)]
@@ -27,13 +28,13 @@
   (let [mname (name model-name)
         {:keys [color opacity]} opts]
     (make-leaf mname (str "/" mname) shape-data
-               (or color 0x4488cc) (or opacity 1.0) #js [1 1])))
+               (or color (cfg/get-default-shape-color)) (or opacity 1.0) #js [1 1])))
 
 (defn build-child-part [model-name tag-label shape-data & [pos]]
   (let [mname (name model-name)
         tname (name tag-label)]
     (make-leaf tname (str "/" mname "/" tname) shape-data
-               0x4488cc 1.0 #js [1 1] pos)))
+               (cfg/get-default-shape-color) 1.0 #js [1 1] pos)))
 
 (defn build-shapes-tree [model-name main-part tag-parts]
   (let [mname (name model-name)
