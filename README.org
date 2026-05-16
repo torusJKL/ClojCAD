@@ -25,10 +25,16 @@ with =:opacity=.
 All primitives return an OpenCascade =TopoDS_Shape=.
 
 #+begin_src clojure
-(kernel/make-sphere 10)           ;; radius
-(kernel/make-box 15 15 15)        ;; dx dy dz
-(kernel/make-cylinder 5 20)       ;; radius height
-(kernel/make-cone 5 10 15)        ;; radius1 radius2 height
+(kernel/make-sphere 10)               ;; radius
+(kernel/make-box 15 15 15)            ;; dx dy dz
+(kernel/make-box 15 15 15 true)       ;; dx dy dz centered? - centers at origin
+(kernel/make-cylinder 5 20)           ;; radius height
+(kernel/make-cylinder 5 20 true)      ;; radius height centered? - centers at origin
+(kernel/make-cone 5 10 15)            ;; radius1 radius2 height
+(kernel/make-circle 5)                ;; radius -> face (for Extrude)
+(kernel/make-circle 5 true)           ;; radius wire? -> wire (for Loft/Pipe)
+(kernel/make-polygon [[0 0] [10 0] [10 10] [0 10]])  ;; points -> face
+(kernel/make-polygon [[0 0] [10 0] [10 10] [0 10]] true)  ;; points wire? -> wire
 #+end_src
 
 ** Boolean Operations

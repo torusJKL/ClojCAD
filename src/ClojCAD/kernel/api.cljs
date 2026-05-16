@@ -16,6 +16,8 @@
 (def make-box primitives/make-box)
 (def make-cylinder primitives/make-cylinder)
 (def make-cone primitives/make-cone)
+(def make-circle primitives/make-circle)
+(def make-polygon primitives/make-polygon)
 
 (def translate primitives/translate)
 (def rotate primitives/rotate)
