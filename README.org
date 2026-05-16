@@ -1,5 +1,9 @@
 * ClojCAD
 
+#+HTML: <p align="center">
+#+HTML: <img src="public/ClojCAD-logo.svg" width="300" height="300" />
+#+HTML: </p>
+
 ClojCAD is a browser-based parametric CAD environment written in ClojureScript.
 It uses OpenCascade.js as its geometry kernel and three-cad-viewer for interactive 3D rendering.
 Models are defined declaratively via a Clojure DSL and update in real-time as parameters change.
