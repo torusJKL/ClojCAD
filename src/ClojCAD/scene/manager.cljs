@@ -112,15 +112,15 @@
               (when (not (seq tags))
                 (aset model-part "id" (str "/root/" name-str)))
               (vw/render-initial! shapes))))
-         (catch :default e
-          (swap! scene assoc name-str
-            {:occt-shape nil
-             :mesh nil
-             :tags {}
-             :tags-visible {}
-             :opts (merge opts display-opts)
-             :visible? true
-             :error (str e)}))))))
+          (catch :default e
+           (swap! scene assoc name-str
+             {:occt-shape nil
+              :mesh nil
+              :tags {}
+              :tags-visible {}
+              :opts (merge opts display-opts)
+              :visible? true
+              :error (str e)}))))))
 
 (defn hide-model [model-name]
   (let [name-str (name model-name)

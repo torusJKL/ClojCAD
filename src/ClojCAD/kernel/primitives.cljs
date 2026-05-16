@@ -113,6 +113,19 @@
       (.SetTranslation_1 trsf
         (js/Reflect.construct (.-gp_Vec_4 (oc)) #js [x y z])))))
 
+(defn extrude
+  ([face direction]
+   (let [[dx dy dz] direction]
+     (when face
+       (when (or (not (zero? dx)) (not (zero? dy)) (not (zero? dz)))
+         (let [ctor (.-BRepPrimAPI_MakePrism_1 (oc))
+               vec (js/Reflect.construct (.-gp_Vec_4 (oc)) #js [dx dy dz])
+               builder (js/Reflect.construct ctor #js [face vec false true])
+               shape (.Shape builder)]
+           (.delete builder)
+           (lifecycle/track shape)
+           shape))))))
+
 (defn rotate [shape axis-x axis-y axis-z degrees]
   (with-trsf shape
     (fn [trsf]

@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "opencascade.js": "github:zalo/opencascade.js#cascadestudio-v2",
+    "opentype.js": "https://registry.npmjs.org/opentype.js/-/opentype.js-2.0.0.tgz",
     "three-cad-viewer": "https://registry.npmjs.org/three-cad-viewer/-/three-cad-viewer-4.3.9.tgz"
   },
   "devDependencies": {

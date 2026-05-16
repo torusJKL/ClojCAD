@@ -72,3 +72,12 @@
         rotated (sut/rotate box 0 0 1 45)]
     (is (some? rotated))
     (is (false? (.IsNull rotated)))))
+
+(deftest extrude-face-returns-shape
+  (let [face (sut/make-circle 5)
+        extruded (sut/extrude face [0 0 10])]
+    (is (some? extruded))
+    (is (false? (.IsNull extruded)))))
+
+(deftest extrude-nil-face-returns-nil
+  (is (nil? (sut/extrude nil [0 0 10]))))

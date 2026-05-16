@@ -20,8 +20,13 @@ if (fs.existsSync(ocDist)) {
 
   // Replace import.meta.url in the Emscripten boilerplate.
   code = code.replace(/import\.meta\.url/g, '"."');
-  // Convert ESM default export to CommonJS so Node can require() it.
-  code = code.replace(/export default Module;/, "module.exports = Module;");
+  // Convert ESM default export to CommonJS so Node and shadow-cljs can require() it.
+  // Handles both original ESM (export default Module) and already-patched CJS.
+  if (/export default Module;/.test(code)) {
+    code = code.replace(/export default Module;/, "module.exports = Module;\nmodule.exports.default = Module;");
+  } else if (/^module\.exports = Module;$/m.test(code)) {
+    code = code.replace(/^module\.exports = Module;$/m, "module.exports = Module;\nmodule.exports.default = Module;");
+  }
 
   fs.writeFileSync(ocDist, code);
   console.log("Patched cascadestudio.js: replaced import.meta.url, converted to CJS");

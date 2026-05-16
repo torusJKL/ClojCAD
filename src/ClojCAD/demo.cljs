@@ -34,6 +34,10 @@
                        (kernel/translate cx 0 0))]
     (booleans/cut capsule top-hole side-hole front-hole)))
 
+(defmodel text-label [size]
+  (kernel/translate (kernel/text3d "ClojCAD" size :font "Cousine-Bold" :height 0.25) -6 -4 8))
+
 (defn start-demo! []
   (reset! params {:r 10})
-  (sm/show boolean-bench {:r 8}))
+  (sm/show boolean-bench {:r 8})
+  (sm/show text-label {:size 6} {:color 0x5b7dbf}))
