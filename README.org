@@ -58,7 +58,8 @@ Two loading options:
 
 - **=load-font!=( recommended)** — Uses a synchronous XHR request. Blocks until the font is
   fetched and parsed. Returns the font object (or =nil= on failure). After this call returns,
-  the font is immediately available for =text3d= with no async gap.
+  the font is immediately available for =text3d= with no async gap. The font also persists
+  to IndexedDB in the background, surviving page reloads.
   
   #+begin_src clojure
   (kernel/load-font! "Mine" "/fonts/Mine.ttf")
@@ -75,7 +76,7 @@ Two loading options:
   #+end_src
 
 Use =load-font!= when you need the font immediately and don't want to chain promises.
-Use =register-font!= when you want IndexedDB persistence across page reloads.
+Use =register-font!= when you can work with promises.
 
 ** Boolean Operations
 
