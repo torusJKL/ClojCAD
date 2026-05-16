@@ -24,4 +24,4 @@
 
 - [x] 6.1 Update test runner to include new export-test, import-test, and loading-test namespaces
 - [x] 6.2 Verify `npm test` passes with all existing and new tests
-- [ ] 6.3 Verify CI workflow runs successfully on a test branch/push (requires push to GitHub)
+- [x] 6.3 Verify CI workflow runs successfully on a test branch/push (requires push to GitHub)
