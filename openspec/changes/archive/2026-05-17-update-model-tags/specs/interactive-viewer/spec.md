@@ -24,18 +24,23 @@ The system SHALL use the library's hierarchical tree to display tagged intermedi
 
 ## ADDED Requirements
 
-### Requirement: All models use tree structure for viewer hierarchy
-`show` SHALL always wrap model parts in a tree structure via `build-shapes-tree`, even when the model has no tags. This ensures the viewer hierarchy can accept child parts for runtime `add-tags`.
+### Requirement: Tagless models use flat structure; add-tags restructures to tree
+`show` SHALL add tagless models as a flat part at `/root/<model-name>`. When `add-tags` is called on a tagless model, the scene manager SHALL restructure it by removing the flat part and adding a tree with a `<model-name>-body` child and the new tag children. Models already in tree form (with tags) receive new tags via child part updates.
 
-#### Scenario: Tagless model displayed as tree with single child
+#### Scenario: Tagless model displayed as flat part
 - **WHEN** user calls `(show model)` and the model has no tags
-- **THEN** the model SHALL be added as a tree part at `/root/<model-name>`
-- **THEN** the tree SHALL contain a single child part at `/root/<model-name>/<model-name>-body`
+- **THEN** the model SHALL be added as a flat part at `/root/<model-name>`
 
-#### Scenario: Tagless tree structure supports add-tags
+#### Scenario: First add-tags restructures flat model to tree
 - **WHEN** user calls `(show model)` on a tagless model, then calls `(add-tags 'model {:label shape})`
-- **THEN** the new tag SHALL appear as a child at `/root/<model-name>/:label`
-- **THEN** the existing body child at `/root/<model-name>/<model-name>-body` SHALL remain unchanged
+- **THEN** the flat part at `/root/<model-name>` SHALL be removed
+- **THEN** a tree part SHALL be added at `/root/<model-name>` containing a `<model-name>-body` child and a `:label` child
+- **THEN** the `:label` tag SHALL appear in the scene atom's `:tags` map
+
+#### Scenario: Adding tags to an already-tree model adds children
+- **WHEN** a model already has tags in the scene and user calls `(add-tags 'model {:another shape})`
+- **THEN** the new tag SHALL be added as a child part at `/root/<model-name>/:another`
+- **THEN** existing children (including `<model-name>-body`) SHALL remain unchanged
 
 ### Requirement: Scene manager handles dynamic child part lifecycle
 The scene manager SHALL support adding and removing individual child parts on an existing scene entry, including tessellation, viewer sync, and `:tags-visible` initialization.

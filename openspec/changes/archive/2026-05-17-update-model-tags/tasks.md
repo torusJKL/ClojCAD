@@ -1,8 +1,8 @@
-## 1. Always use tree structure in show
+## 1. Flat parts for tagless models; restructure on first add-tags
 
 - [x] 1.1 Keep `show` using flat parts for tagless models — only restructure on first `add-tags` — when no tags exist, wrap the body part in a tree with a single child at `<name>-body`
 - [x] 1.2 In `add-tags`, restructure tagless model from flat part to tree (remove + add tree) (remove the `(when (not (seq tags)) (aset model-part "id" ...))` special case)
-- [x] 1.3 Add `body-path` helper and `notify-callback` body-path handling for restructured models — notify-callback now detects `-body` paths; `show-model`/`hide-model` model-name form also toggles body child path for proper 3D view sync
+- [x] 1.3 Add `body-path` helper and `notify-callback` body-path handling for restructured models — detects `<name>-body` paths in `notify-callback` and routes them to model-level visibility toggles instead of tag-level toggles
 
 ## 2. Update shape_adapter.cljs — support opts in build-child-part
 

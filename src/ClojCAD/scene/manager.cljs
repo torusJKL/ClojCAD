@@ -15,6 +15,9 @@
 (defn- tag-path [name tag-label]
   (str "/root/" name "/" tag-label))
 
+(defn- body-path? [model-name tag-label]
+  (= tag-label (str model-name "-body")))
+
 (defn- notify-callback [changes]
   (when-let [states-change (.-states changes)]
     (when-let [states (.-new states-change)]
@@ -32,9 +35,13 @@
             (let [model-name (second parts)
                   tag-label (nth parts 2)
                   visible? (pos? (first state-arr))]
-              (if visible?
-                (show-model {:tag (keyword tag-label) :model (symbol model-name)})
-                (hide-model {:tag (keyword tag-label) :model (symbol model-name)})))))))))
+              (if (body-path? model-name tag-label)
+                (if visible?
+                  (show-model model-name)
+                  (hide-model model-name))
+                (if visible?
+                  (show-model {:tag (keyword tag-label) :model (symbol model-name)})
+                  (hide-model {:tag (keyword tag-label) :model (symbol model-name)}))))))))))
 
 (vw/set-notify-handler! notify-callback)
 

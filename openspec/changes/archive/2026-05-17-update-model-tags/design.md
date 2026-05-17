@@ -47,17 +47,17 @@ If a tag to remove doesn't exist on a model, it's a no-op. This makes removal id
 When a model is re-evaluated (due to param changes), the scene entry is recomputed from scratch, including its `:tags` map. Mutated tags are not preserved. This keeps the system simple and avoids stale state.
 - *Alternative considered*: Persisting mutations across re-evaluations. Rejected because it introduces complex merge semantics and violates the principle that model output is a pure function of its parameters.
 
-**Decision 7: Always use tree structure in `show` — even for tagless models**
-Currently `show` adds a model as a flat part (`/root/<name>`) when it has no tags, or a tree part (`/root/<name>` with children) when it has tags. To support `add-tags` on any model, `show` SHALL always use `build-shapes-tree` with a single body child (no tag children) for tagless models. This ensures the viewer hierarchy always supports child parts.
-- *Consequence*: Tagless models will have a body child at `/root/<name>/<name>-body` instead of the flat part at `/root/<name>`. Tree panel will show an expandable entry with one child for tagless models — a minor cosmetic change.
-- *Alternative considered*: Restructuring on first `add-tags`. Risk of viewer incompatibility. Rejected.
+**Decision 7: Keep flat parts for tagless models; restructure on first `add-tags`**
+`show` SHALL add tagless models as a flat part (`/root/<name>`). When `add-tags` is called on a tagless model, the scene manager SHALL restructure it by removing the flat part and adding a tree with a `<name>-body` child and the new tag children. Models already in tree form (with tags) receive new tags via child part updates.
+- *Rationale*: Avoids the cosmetic change of always showing tagless models as expandable trees with a single child. The restructuring path was straightforward to implement and didn't cause viewer incompatibility concerns in practice.
+- *Alternative considered*: Always using tree structure via `build-shapes-tree` for all models. Rejected during implementation to keep the tree panel cleaner for tagless models.
 
 **Decision 8: Added tags default to origin position**
 Runtime-added tags use `[0 0 0]` as their position offset (matching the default in `build-child-part`). If position support is needed later, the `add-tags` second argument can be extended to accept `{tag-keyword {:shape s :pos [x y z]}}` without breaking the simple `{tag-keyword shape}` form.
 
 ## Risks / Trade-offs
 
-- **[Restructuring tagless models]** Changing `show` to always use tree structure may cause a brief flash when existing tagless models are re-evaluated (part path changes from flat to tree) → Mitigation: This is a one-time transition. New models are always trees from the start.
+- **[Restructuring tagless models]** Restructuring from flat to tree on first `add-tags` causes a brief flash as the flat part is removed and the tree is added → Mitigation: This is a one-time transition per model. After restructuring, subsequent tag adds/removes use `updatePart`/`removePart` on child paths.
 - **[Stale viewer state]** If a tag is removed while the viewer notification is pending, the child part removal call may fail → Mitigation: Wrap viewer calls in try/catch and log warnings. Scene atom is the source of truth.
 - **[Performance on large models]** Tessellating a new tag shape synchronously could block the UI thread → Mitigation: Keep tessellation synchronous (matching existing scene manager conventions) but document that large shapes should be added during model definition for reactivity.
 - **[Tag collision with defmodel tags]** If a user adds a tag label that already exists from the model definition, the new shape replaces the old one silently → Trade-off: Acceptable for now. A future warning could be added for duplicate tags.
