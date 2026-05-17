@@ -86,18 +86,55 @@
           (recur (inc ti) (+ offset 50)))))
     (download-blob! buf filename "model/stl")))
 
+(defn- merge-meshes [meshes]
+  (let [total-verts (reduce + 0 (map #(alength (:vertices %)) meshes))
+        total-indices (reduce + 0 (map #(alength (:indices %)) meshes))
+        result-vertices (js/Float32Array. total-verts)
+        result-normals (js/Float32Array. total-verts)
+        result-indices (js/Uint32Array. total-indices)
+        voffset (atom 0)
+        ioffset (atom 0)]
+    (doseq [mesh meshes]
+      (let [verts (:vertices mesh)
+            norms (:normals mesh)
+            idxs (:indices mesh)
+            nv (alength verts)
+            ni (alength idxs)]
+        (.set result-vertices verts @voffset)
+        (.set result-normals norms @voffset)
+        (loop [i 0]
+          (when (< i ni)
+            (aset result-indices (+ @ioffset i) (+ (aget idxs i) (/ @voffset 3)))
+            (recur (inc i))))
+        (swap! voffset + nv)
+        (swap! ioffset + ni)))
+    {:vertices result-vertices
+     :normals result-normals
+     :indices result-indices
+     :obj-vertices result-vertices
+     :face-types (js/Int32Array. 0)
+     :triangles-per-face (js/Int32Array. 0)
+     :edge-types (js/Int32Array. 0)
+     :segments-per-edge (js/Int32Array. 0)
+     :edges (js/Float32Array. 0)}))
+
 (defn export-stl
   ([shape filename]
    (export-stl shape filename nil))
   ([shape filename {:keys [max-deviation]}]
-   (if (invalid-shape? shape)
-     (js/console.warn "export-stl: invalid shape")
-     (try
-       (let [deviation (or max-deviation 0.05)
-             mesh (mesh/tessellate shape deviation)]
-         (write-binary-stl! mesh filename))
-       (catch :default e
-         (js/console.warn "export-stl failed:" e))))))
+   (let [shapes (if (sequential? shape) shape [shape])]
+     (if (some invalid-shape? shapes)
+       (js/console.warn "export-stl: invalid shape in input")
+       (try
+         (let [deviation (or max-deviation 0.05)]
+           (if (= (count shapes) 1)
+             (let [mesh (mesh/tessellate (first shapes) deviation)]
+               (write-binary-stl! mesh filename))
+             (let [meshes (mapv #(mesh/tessellate % deviation) shapes)
+                   merged (merge-meshes meshes)]
+               (write-binary-stl! merged filename))))
+         (catch :default e
+           (js/console.warn "export-stl failed:" e)))))))
 
 (defn- transfer-all [writer shapes mode progress]
   (loop [[s & rest] shapes]
