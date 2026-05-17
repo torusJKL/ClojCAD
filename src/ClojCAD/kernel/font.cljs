@@ -10,13 +10,17 @@
    {:name "Cousine-Italic"  :url "/fonts/Cousine-Italic.ttf"}
    {:name "Cousine-BoldItalic" :url "/fonts/Cousine-BoldItalic.ttf"}])
 
-(defn lookup-font [name]
+(defn lookup-font
+  "Look up a registered font by name. Returns the opentype.js Font object or nil." [name]
   (get @registry name))
 
-(defn list-fonts []
+(defn list-fonts
+  "Return a list of all registered font names." []
   (keys @registry))
 
-(defn font-info [name]
+(defn font-info
+  "Return metadata for a registered font including source (:bundled or :custom),
+   font family, style, and glyph count." [name]
   (when-let [font (lookup-font name)]
     {:name name
      :source (if (@bundled-names name) :bundled :custom)
@@ -85,7 +89,9 @@
       (.catch (fn [e]
         (js/console.warn "IndexedDB unavailable, fonts not restored:" e)))))
 
-(defn load-bundled-fonts! []
+(defn load-bundled-fonts!
+  "Load all bundled fonts (Cousine variants) from the server and restore any
+   previously registered fonts from IndexedDB. Called during kernel initialization." []
   (-> (js/Promise.all
         (clj->js
           (map (fn [{:keys [name url]}]
@@ -106,7 +112,9 @@
       (.then (fn [v] (.close db) v))
       (.catch (fn [e] (.close db) (throw e)))))
 
-(defn register-font! [name url]
+(defn register-font!
+  "Register a custom font by fetching it from the given URL. The font is parsed via
+   opentype.js and persisted to IndexedDB for future sessions. Returns a Promise of the Font object." [name url]
   (-> (js/fetch url)
       (.then (fn [resp] (.arrayBuffer resp)))
       (.then (fn [buf]
@@ -119,7 +127,9 @@
                 (js/console.warn "IndexedDB unavailable, font not persisted:" e))))
           font)))))
 
-(defn load-font! [name url]
+(defn load-font!
+  "Synchronously load a font from the given URL via XMLHttpRequest and register it.
+   The font is also persisted to IndexedDB. Returns the Font object or nil on failure." [name url]
   (try
     (let [req (js/XMLHttpRequest.)
           _ (.open req "GET" url false)

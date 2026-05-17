@@ -8,7 +8,8 @@
     (js/RegExp. (str "^" (str/replace pattern "*" ".*") "$"))))
 
 (defn list-objects
-  ([] @sm/scene)
+  "List objects in the scene with optional filters. Filters can include :tag, :visibility,
+   and :name-matching (supports glob * wildcards). Returns a map of name -> entry." ([] @sm/scene)
   ([filters]
    (let [{:keys [tag visibility name-matching]} filters
          tag-str (when tag (name tag))
@@ -25,17 +26,32 @@
                     acc))
                 {} @sm/scene))))
 
-(defn list-tags []
+(defn list-tags
+  "Return a set of all tag labels currently used across all objects in the scene." []
   (into #{}
     (comp (map (fn [[_ entry]] (keys (:tags entry))))
           cat
           (map keyword))
     @sm/scene))
 
-(def show-model sm/show-model)
-(def hide-model sm/hide-model)
-(def toggle-model sm/toggle-model)
-(def show-all sm/show-all)
-(def hide-all sm/hide-all)
-(def add-tags sm/add-tags)
-(def remove-tags sm/remove-tags)
+(def show-model
+  "Show a model or specific tag in the viewport."
+  sm/show-model)
+(def hide-model
+  "Hide a model or specific tag in the viewport."
+  sm/hide-model)
+(def toggle-model
+  "Toggle visibility of a model or tag."
+  sm/toggle-model)
+(def show-all
+  "Show all models in the scene."
+  sm/show-all)
+(def hide-all
+  "Hide all models in the scene."
+  sm/hide-all)
+(def add-tags
+  "Add tagged sub-shapes to an existing model."
+  sm/add-tags)
+(def remove-tags
+  "Remove tagged sub-shapes from a model."
+  sm/remove-tags)

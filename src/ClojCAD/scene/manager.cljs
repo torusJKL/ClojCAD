@@ -81,7 +81,9 @@
     true))
 
 (defn show
-  ([model] (show model {} {}))
+  "Display a model in the 3D viewport. The model can be any parametric model function
+   (typically created by defmodel). Optional params-override and display-opts can be provided.
+   Initializes the viewport on first use and immediately renders the model." ([model] (show model {} {}))
   ([model params-override] (show model params-override {}))
   ([model params-override display-opts]
    (let [{:keys [name opts]} (meta model)
@@ -152,7 +154,8 @@
                 {} @scene))))
 
 (defn show-model
-  ([arg]
+  "Show a model or specific tag in the viewport. Accepts a model name (keyword or string)
+   or a map with :tag, :model, and/or :name-matching keys for filtering." ([arg]
    (if (map? arg)
      (let [{:keys [tag model name-matching]} arg
            tag-str (when tag (name tag))
@@ -171,7 +174,7 @@
          (.setState viewer path #js [1 1]))))))
 
 (defn hide-model
-  ([arg]
+  "Hide a model or specific tag in the viewport. Accepts the same arguments as show-model." ([arg]
    (if (map? arg)
      (let [{:keys [tag model name-matching]} arg
            tag-str (when tag (name tag))
@@ -190,7 +193,8 @@
           (.setState viewer path #js [0 0]))))))
 
 (defn toggle-model
-  [arg]
+  "Toggle the visibility of a model or specific tag in the viewport.
+   Accepts a map with :tag, :model, and/or :name-matching keys." [arg]
   (let [{:keys [tag model name-matching]} arg
         tag-str (when tag (name tag))
         models (matching-models arg)]
@@ -209,22 +213,27 @@
             (.setObject viewer path (if new-val 1 0) 0 false false)
             (.setState viewer path #js [(if new-val 1 0) (if new-val 1 0)])))))))
 
-(defn show-all []
+(defn show-all
+  "Show all models in the scene." []
   (doseq [[name-str _] @scene]
     (show-model name-str)))
 
-(defn hide-all []
+(defn hide-all
+  "Hide all models in the scene." []
   (doseq [[name-str _] @scene]
     (hide-model name-str)))
 
-(defn remove-model [model-name]
+(defn remove-model
+  "Remove a model (keyword or string) from the scene and viewport." [model-name]
   (let [name-str (name model-name)]
     (swap! scene dissoc name-str)
     (when-let [viewer @vw/*viewer]
       (.removePart viewer (model-path name-str)))))
 
 (defn add-tags
-  ([model-id tags-map]
+  "Add tagged sub-shapes to an existing model. tags-map is a map from label keywords to
+   TopoDS_Shape values. Accepts a model name or a filter map (with :model, :tag, :name-matching).
+   Returns the updated tags map for the model(s)." ([model-id tags-map]
    (let [models (if (map? model-id)
                   (matching-models model-id)
                   (let [name-str (name model-id)]
@@ -268,7 +277,8 @@
        (:tags (get @scene (name model-id)))))))
 
 (defn remove-tags
-  [model-id & tag-labels]
+  "Remove tagged sub-shapes from a model by tag label(s). Accepts a model name or filter map.
+   Returns the updated tags map for the model(s)." [model-id & tag-labels]
   (let [models (if (map? model-id)
                  (matching-models model-id)
                  (let [name-str (name model-id)]
@@ -292,7 +302,8 @@
       (into {} (for [[n _] models] [n (:tags (get @scene n))]))
       (:tags (get @scene (name model-id))))))
 
-(defn set-opacity [model-name opacity]
+(defn set-opacity
+  "Set the display opacity (0.0 to 1.0) for a model." [model-name opacity]
   (let [name-str (name model-name)]
     (swap! scene assoc-in [name-str :opts :opacity] opacity)
     (let [{:keys [mesh opts]} (get @scene name-str)

@@ -2,7 +2,10 @@
   (:require [ClojCAD.model.tag :as tag]
             [ClojCAD.model.registry :as registry]))
 
-(defn reactive-model [name param-keys f opts]
+(defn reactive-model
+  "Create a reactive parametric model. The model function f is called with a params map
+   and its result is cached keyed by params. The model is registered in the global registry.
+   Returns the model function with metadata containing :name, :param-keys, and :opts." [name param-keys f opts]
   (let [cache-key (atom ::empty)
         cache-val (atom nil)
         model-fn

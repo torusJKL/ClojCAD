@@ -35,8 +35,8 @@
           shape))))
 
 (defn import-stl
-  "Import a STL file (ASCII or binary) from an ArrayBuffer.
-   Returns a TopoDS_Shape or nil on failure."
+  "Import an STL file (ASCII or binary) from an ArrayBuffer.
+   Returns a TopoDS_Shape (converted to a SOLID if needed) or nil on failure."
   [data filename]
   (let [oc-inst (oc)
         memfs-path (str "/" filename)]

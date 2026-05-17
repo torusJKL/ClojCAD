@@ -5,7 +5,9 @@
             [ClojCAD.model.core :as model])
   (:require-macros [ClojCAD.model.defmodel :refer [defmodel]]))
 
-(def params sm/params)
+(def params
+  "Atom holding the current parameter values for parametric models."
+  sm/params)
 
 (defn- centered-cyl [r h]
   (kernel/translate (kernel/make-cylinder r h) 0 0 (* -0.5 h)))
@@ -37,7 +39,8 @@
 (defmodel text-label [size]
   (kernel/translate (kernel/text3d "ClojCAD" size :font "Cousine-Bold" :height 0.25) -6 -4 8))
 
-(defn start-demo! []
+(defn start-demo!
+  "Start the demo by setting initial parameters and showing the demo models in the viewport." []
   (reset! params {:r 10})
   (sm/show boolean-bench {:r 8})
   (sm/show text-label {:size 6} {:color 0x5b7dbf}))

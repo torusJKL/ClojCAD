@@ -11,7 +11,8 @@
       (js/document.head.appendChild style)
       (reset! *injected-style true))))
 
-(defn show-loading! []
+(defn show-loading!
+  "Show a full-screen loading spinner overlay." []
   (inject-style!)
   (when (nil? @*overlay)
     (let [overlay (js/document.createElement "div")]
@@ -36,12 +37,14 @@
       (js/document.body.appendChild overlay)
       (reset! *overlay overlay))))
 
-(defn hide-loading! []
+(defn hide-loading!
+  "Hide the loading spinner overlay." []
   (when-let [o @*overlay]
     (js/document.body.removeChild o)
     (reset! *overlay nil)))
 
-(defn notify! [msg]
+(defn notify!
+  "Show a temporary toast notification with the given message. Auto-hides after 4 seconds." [msg]
   (let [toast (js/document.createElement "div")]
     (set! (.. toast -style -position) "fixed")
     (set! (.. toast -style -bottom) "24px")

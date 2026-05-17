@@ -97,7 +97,10 @@
      :triangles-per-face triangles-per-face}))
 
 (defn tessellate
-  ([x] (tessellate x 0.1))
+  "Tessellate a shape into a mesh for rendering or export.
+   Optional maxDeviation parameter (default 0.1) controls the tessellation quality.
+   Accepts either a TopoDS_Shape or a map with a :shape key.
+   Returns a map with :vertices, :normals, :indices, :edges, and other mesh data." ([x] (tessellate x 0.1))
   ([x maxDeviation]
    (let [shape (if (map? x) (:shape x) x)]
      (try

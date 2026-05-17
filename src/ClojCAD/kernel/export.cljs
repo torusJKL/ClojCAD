@@ -119,7 +119,8 @@
      :edges (js/Float32Array. 0)}))
 
 (defn export-stl
-  ([shape filename]
+  "Export one or more shapes to a binary STL file and trigger a browser download.
+   Options may include :max-deviation (default 0.05) to control tessellation quality." ([shape filename]
    (export-stl shape filename nil))
   ([shape filename {:keys [max-deviation]}]
    (let [shapes (if (sequential? shape) shape [shape])]
@@ -150,7 +151,8 @@
   (.. (oc) -IFSelect_ReturnStatus -IFSelect_RetDone))
 
 (defn export-step
-  ([shape filename]
+  "Export one or more shapes to a STEP file and trigger a browser download.
+   Exports using the STEP AP203 'AsIs' mode." ([shape filename]
    (export-step shape filename nil))
   ([shape filename _opts]
    (let [shapes (if (sequential? shape) shape [shape])]

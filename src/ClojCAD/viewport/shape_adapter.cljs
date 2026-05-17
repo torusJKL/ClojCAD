@@ -1,7 +1,9 @@
 (ns ClojCAD.viewport.shape-adapter
   (:require [ClojCAD.viewport.config :as cfg]))
 
-(defn tessellation->shape [{:keys [vertices normals indices edges]}]
+(defn tessellation->shape
+  "Convert a ClojCAD tessellation map (with :vertices, :normals, :indices, :edges)
+   into a plain JS object suitable for three-cad-viewer." [{:keys [vertices normals indices edges]}]
   (let [s (js-obj)]
     (aset s "vertices" vertices)
     (aset s "triangles" indices)
@@ -24,14 +26,17 @@
     (aset leaf "loc" #js [#js [x y z] #js [0 0 0 1]])
     leaf))
 
-(defn build-part [model-name shape-data & [opts]]
+(defn build-part
+  "Build a single solid part JS object from model-name and tessellation data.
+   Options may include :color and :opacity." [model-name shape-data & [opts]]
   (let [mname (name model-name)
         {:keys [color opacity]} opts]
     (make-leaf mname (str "/" mname) shape-data
                (or color (cfg/get-default-shape-color)) (or opacity 1.0) #js [1 1])))
 
 (defn build-child-part
-  ([model-name tag-label shape-data]
+  "Build a tagged child part JS object. The child is positioned at an optional
+   [x y z] location. Options may include :color and :opacity." ([model-name tag-label shape-data]
    (build-child-part model-name tag-label shape-data nil nil))
   ([model-name tag-label shape-data pos]
    (build-child-part model-name tag-label shape-data pos nil))
@@ -44,7 +49,9 @@
                 (or opacity 1.0)
                 #js [1 1] pos))))
 
-(defn build-shapes-tree [model-name main-part tag-parts]
+(defn build-shapes-tree
+  "Build a shapes tree JS object combining a main body part with tagged child parts
+   for rendering in three-cad-viewer." [model-name main-part tag-parts]
   (let [mname (name model-name)
         tree (js-obj)
         parts-arr (array)]
