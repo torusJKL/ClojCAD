@@ -174,13 +174,13 @@
          (swap! scene assoc-in [name-str :tags-visible tag-str] false)
          (when-let [viewer @vw/*viewer]
            (.setObject viewer path 0 0 false false)
-           (.setState viewer path #js [0 1]))))
-     (let [name-str (name arg)
-           path (model-path name-str)]
-       (swap! scene assoc-in [name-str :visible?] false)
-       (when-let [viewer @vw/*viewer]
-         (.setObject viewer path 0 0 false false)
-         (.setState viewer path #js [0 1]))))))
+            (.setState viewer path #js [0 0]))))
+      (let [name-str (name arg)
+            path (model-path name-str)]
+        (swap! scene assoc-in [name-str :visible?] false)
+        (when-let [viewer @vw/*viewer]
+          (.setObject viewer path 0 0 false false)
+          (.setState viewer path #js [0 0]))))))
 
 (defn toggle-model
   [arg]
@@ -194,13 +194,13 @@
           (swap! scene assoc-in [name-str :tags-visible tag-str] new-val)
           (when-let [viewer @vw/*viewer]
             (.setObject viewer path (if new-val 1 0) 0 false false)
-            (.setState viewer path #js [(if new-val 1 0) 1])))
+            (.setState viewer path #js [(if new-val 1 0) (if new-val 1 0)])))
         (let [path (model-path name-str)
               new-val (not (:visible? entry))]
           (swap! scene assoc-in [name-str :visible?] new-val)
           (when-let [viewer @vw/*viewer]
             (.setObject viewer path (if new-val 1 0) 0 false false)
-            (.setState viewer path #js [(if new-val 1 0) 1])))))))
+            (.setState viewer path #js [(if new-val 1 0) (if new-val 1 0)])))))))
 
 (defn show-all []
   (doseq [[name-str _] @scene]
