@@ -7,7 +7,7 @@
 (defonce *display-ref (atom nil))
 
 (defn- scene-data []
-  (let [ns (js* "ClojCAD.scene.manager")]
+  (let [^js ns (js* "ClojCAD.scene.manager")]
     {:scene @(.-scene ns)
      :current-model @(.-current-model ns)}))
 

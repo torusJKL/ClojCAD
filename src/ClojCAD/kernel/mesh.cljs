@@ -1,7 +1,8 @@
 (ns ClojCAD.kernel.mesh)
 
-(defn- oc []
-  @(.-oc_instance (js* "ClojCAD.kernel.init")))
+(defn- ^js oc []
+  (let [^js init-ns (js* "ClojCAD.kernel.init")]
+    @(.-oc_instance init-ns)))
 
 (defn- empty-result []
   {:vertices (js/Float32Array. 0) :normals (js/Float32Array. 0)
@@ -11,21 +12,22 @@
    :segments-per-edge (js/Int32Array. 0)})
 
 (defn- extract-edges [shape maxDeviation]
-  (let [oc-inst (oc)
+  (let [^js oc-inst (oc)
+        ^js shape-enum (.-TopAbs_ShapeEnum oc-inst)
         explorer (js/Reflect.construct
                    (.-TopExp_Explorer_2 oc-inst)
                    #js [shape
-                        (.. oc-inst -TopAbs_ShapeEnum -TopAbs_EDGE)
-                        (.. oc-inst -TopAbs_ShapeEnum -TopAbs_SHAPE)])
+                        (.-TopAbs_EDGE shape-enum)
+                        (.-TopAbs_SHAPE shape-enum)])
         out #js[] edge-types #js[] segments-per-edge #js[]]
     (while (.More explorer)
       (let [edge (.Value explorer)]
         (try
-          (let [cast (.-TopoDS_Cast oc-inst)
-                my-edge (.Edge_1 cast edge)
-                adaptor (js/Reflect.construct (.-BRepAdaptor_Curve_2 oc-inst) #js [my-edge])
+          (let [^js cast (.-TopoDS_Cast oc-inst)
+                ^js my-edge (.Edge_1 cast edge)
+                ^js adaptor (js/Reflect.construct (.-BRepAdaptor_Curve_2 oc-inst) #js [my-edge])
                 curve-type (.GetType adaptor)
-                sampler (js/Reflect.construct (.-GCPnts_TangentialDeflection_2 oc-inst) #js [adaptor maxDeviation 0.1 2 1.0e-9 1.0e-7])
+                ^js sampler (js/Reflect.construct (.-GCPnts_TangentialDeflection_2 oc-inst) #js [adaptor maxDeviation 0.1 2 1.0e-9 1.0e-7])
                 np (.NbPoints sampler)]
             (.push edge-types curve-type)
             (.push segments-per-edge (dec np))
@@ -42,44 +44,48 @@
     {:points out :edge-types edge-types :segments-per-edge segments-per-edge}))
 
 (defn- extract-faces [shape]
-  (let [oc-inst (oc)
+  (let [^js oc-inst (oc)
+        ^js shape-enum (.-TopAbs_ShapeEnum oc-inst)
+        ^js orientation (.-TopAbs_Orientation oc-inst)
         fexp (js/Reflect.construct
                (.-TopExp_Explorer_2 oc-inst)
                #js [shape
-                    (.. oc-inst -TopAbs_ShapeEnum -TopAbs_FACE)
-                    (.. oc-inst -TopAbs_ShapeEnum -TopAbs_SHAPE)])
+                    (.-TopAbs_FACE shape-enum)
+                    (.-TopAbs_SHAPE shape-enum)])
         all-verts #js[] all-norms #js[] all-idxs #js[]
         all-obj-verts #js[] face-types #js[] triangles-per-face #js[]
         offset (atom 0)
-        cast (.-TopoDS_Cast oc-inst)
-        is-forward (.. oc-inst -TopAbs_Orientation -TopAbs_FORWARD)]
+        ^js cast (.-TopoDS_Cast oc-inst)
+        is-forward (.-TopAbs_FORWARD orientation)]
     (while (.More fexp)
       (let [raw-face (.Value fexp)]
         (try
-          (let [face (.Face_1 cast raw-face)
-                loc (js/Reflect.construct (.-TopLoc_Location_1 oc-inst) #js [])
-                tri-handle (oc-inst.BRep_Tool.Triangulation face loc 0)
+          (let [^js face (.Face_1 cast raw-face)
+                ^js loc (js/Reflect.construct (.-TopLoc_Location_1 oc-inst) #js [])
+                ^js tri-handle (oc-inst.BRep_Tool.Triangulation face loc 0)
                 rev? (not= (.Orientation_1 face) is-forward)
                 trsf (.Transformation loc)]
             (when-not (.IsNull tri-handle)
-              (let [tri (.get tri-handle)
+              (let [^js tri (.get tri-handle)
                     nn (.NbNodes tri)
                     nt (.NbTriangles tri)]
                 (loop [i 1]
                   (when (<= i nn)
-                    (let [p (.Transformed (.Node tri i) trsf)]
+                    (let [^js node (.Node tri i)
+                          ^js p (.Transformed node trsf)]
                       (.push all-verts (.X p)) (.push all-verts (.Y p)) (.push all-verts (.Z p))
                       (.push all-obj-verts (.X p)) (.push all-obj-verts (.Y p)) (.push all-obj-verts (.Z p))
                       (recur (inc i)))))
                 (when-not (.HasNormals tri) (.ComputeNormals tri))
                 (loop [i 1]
                   (when (<= i nn)
-                    (let [d (.Transformed (.Normal_1 tri i) trsf)]
+                    (let [^js n (.Normal_1 tri i)
+                          ^js d (.Transformed n trsf)]
                       (.push all-norms (.X d)) (.push all-norms (.Y d)) (.push all-norms (.Z d))
                       (recur (inc i)))))
                 (loop [nti 1]
                   (when (<= nti nt)
-                    (let [t (.Triangle tri nti)
+                    (let [^js t (.Triangle tri nti)
                           n1 (.Value t 1) n2 (.Value t 2) n3 (.Value t 3)]
                       (if rev?
                         (do (.push all-idxs (+ n2 (dec @offset)))
@@ -104,7 +110,7 @@
   ([x maxDeviation]
    (let [shape (if (map? x) (:shape x) x)]
      (try
-       (let [oc-inst (oc)]
+       (let [^js oc-inst (oc)]
          (js/Reflect.construct (.-BRepMesh_IncrementalMesh_2 oc-inst)
            #js [shape maxDeviation false (* maxDeviation 5) false])
           (let [{:keys [vertices normals indices obj-vertices face-types triangles-per-face]} (extract-faces shape)

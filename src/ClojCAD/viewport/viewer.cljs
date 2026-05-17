@@ -17,7 +17,7 @@
   (reset! *notify-handler f))
 
 (defn- update-size! []
-  (when-let [display @*display]
+  (when-let [^js display @*display]
     (let [container (js/document.getElementById "cad-view")
           w (.-clientWidth container)
           h (.-clientHeight container)]
