@@ -37,3 +37,5 @@
 (def toggle-model sm/toggle-model)
 (def show-all sm/show-all)
 (def hide-all sm/hide-all)
+(def add-tags sm/add-tags)
+(def remove-tags sm/remove-tags)

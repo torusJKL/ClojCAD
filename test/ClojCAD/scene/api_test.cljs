@@ -1,7 +1,8 @@
 (ns ClojCAD.scene.api-test
   (:require [cljs.test :refer [deftest is testing use-fixtures]]
             [ClojCAD.scene.api :as sut]
-            [ClojCAD.scene.manager :as sm]))
+            [ClojCAD.scene.manager :as sm]
+            [ClojCAD.kernel.api :as kernel]))
 
 (use-fixtures :each
   (fn [f]
@@ -84,3 +85,18 @@
 (deftest list-tags-returns-empty-set-when-no-tags
   (swap! sm/scene assoc "model-a" {:tags {}})
   (is (= #{} (sut/list-tags))))
+
+;; ---- forwarded tag mutation functions ----
+
+(deftest api-add-tags-by-name-works
+  (let [entry {:occt-shape nil :mesh nil :tags {} :tags-visible {} :opts {} :visible? true}]
+    (swap! sm/scene assoc "test-model" entry)
+    (with-redefs [kernel/tessellate (fn [_] {})]
+      (sut/add-tags "test-model" {:sphere {}}))
+    (is (contains? (:tags (get @sm/scene "test-model")) :sphere))))
+
+(deftest api-remove-tags-by-name-works
+  (let [entry {:occt-shape nil :mesh nil :tags {:sphere nil} :tags-visible {"sphere" true} :opts {} :visible? true}]
+    (swap! sm/scene assoc "test-model" entry)
+    (sut/remove-tags "test-model" :sphere)
+    (is (not (contains? (:tags (get @sm/scene "test-model")) :sphere)))))

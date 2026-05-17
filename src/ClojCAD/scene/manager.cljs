@@ -216,6 +216,75 @@
     (when-let [viewer @vw/*viewer]
       (.removePart viewer (model-path name-str)))))
 
+(defn add-tags
+  ([model-id tags-map]
+   (let [models (if (map? model-id)
+                  (matching-models model-id)
+                  (let [name-str (name model-id)]
+                    (if (contains? @scene name-str)
+                      {name-str (get @scene name-str)}
+                      {})))]
+     (when (seq models)
+       (doseq [[name-str entry] models
+               :let [viewer @vw/*viewer
+                     opts (:opts entry)]]
+         (let [new-tags (reduce-kv (fn [m k v] (assoc m k (kernel/tessellate v))) {} tags-map)
+               visible-keys (map name (keys new-tags))]
+           (if (empty? (:tags entry))
+             (let [mesh (:mesh entry)
+                   body-part (sa/build-part name-str mesh opts)
+                   tag-parts (vec (for [[tag-label tag-mesh] new-tags]
+                                    (sa/build-child-part name-str tag-label tag-mesh nil opts)))
+                   tree (sa/build-shapes-tree name-str body-part tag-parts)]
+               (swap! scene update name-str
+                 (fn [e]
+                   (-> e
+                       (update :tags merge new-tags)
+                       (update :tags-visible merge (zipmap visible-keys (repeat true))))))
+               (when viewer
+                 (.removePart viewer (model-path name-str))
+                 (.addPart viewer "/root" tree)))
+             (do
+               (swap! scene update name-str
+                 (fn [e]
+                   (-> e
+                       (update :tags merge new-tags)
+                       (update :tags-visible merge (zipmap visible-keys (repeat true))))))
+               (doseq [[tag-label tag-mesh] new-tags
+                       :let [label-str (name tag-label)]]
+                 (when viewer
+                   (.updatePart viewer (tag-path name-str label-str)
+                                (sa/build-child-part name-str tag-label tag-mesh nil opts)
+                                #js {:skipBounds true}))))))))
+     (if (map? model-id)
+       (into {} (for [[n _] models] [n (:tags (get @scene n))]))
+       (:tags (get @scene (name model-id)))))))
+
+(defn remove-tags
+  [model-id & tag-labels]
+  (let [models (if (map? model-id)
+                 (matching-models model-id)
+                 (let [name-str (name model-id)]
+                   (if (contains? @scene name-str)
+                     {name-str (get @scene name-str)}
+                     {})))]
+    (when (seq models)
+      (doseq [[name-str _] models
+              :let [viewer @vw/*viewer]]
+        (let [tag-strs (map name tag-labels)]
+          (swap! scene update name-str
+            (fn [e]
+              (-> e
+                  (update :tags #(apply dissoc % tag-labels))
+                  (update :tags-visible #(apply dissoc % tag-strs)))))
+          (doseq [tag-label tag-labels
+                  :let [label-str (name tag-label)]]
+            (when viewer
+              (.removePart viewer (tag-path name-str label-str)))))))
+    (if (map? model-id)
+      (into {} (for [[n _] models] [n (:tags (get @scene n))]))
+      (:tags (get @scene (name model-id))))))
+
 (defn set-opacity [model-name opacity]
   (let [name-str (name model-name)]
     (swap! scene assoc-in [name-str :opts :opacity] opacity)

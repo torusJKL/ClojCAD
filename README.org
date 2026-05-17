@@ -222,6 +222,43 @@ body (uses a dynamic binding).
             :box box}}))
 #+end_src
 
+** =add-tags= / =remove-tags=
+
+Dynamically add or remove tagged sub-shapes on displayed models at
+runtime. Accepts either a model name (keyword or symbol) or a filter
+map (=:tag=, =:model=, =:name-matching=) as the first argument.
+
+#+begin_src clojure
+;; Add tags by model name
+(sm/add-tags 'my-model {:warning (kernel/make-sphere 1)})
+
+;; Add multiple tags atomically
+(sm/add-tags 'my-model {:label (kernel/make-sphere 1)
+                        :base (kernel/make-box 10 10 10)})
+
+;; Remove tags by model name
+(sm/remove-tags 'my-model :warning)
+(sm/remove-tags 'my-model :sphere :box)
+
+;; Add tags to all models matching a filter
+(sm/add-tags {:name-matching "temp*"} {:badge (kernel/make-sphere 0.5)})
+
+;; Remove tags from all models matching a filter
+(sm/remove-tags {:tag :sphere :name-matching "temp*"} :sphere)
+
+;; Return value: single model returns updated :tags map
+(def result (sm/add-tags 'my-model {:a (kernel/make-sphere 1)}))
+;; => {:a <mesh-data>, ...existing-tags...}
+
+;; Return value: filter map returns {model-name -> tags-map}
+(sm/add-tags {:name-matching "temp*"} {:a (kernel/make-sphere 1)})
+;; => {"temp-a" {:a <mesh-data>}, "temp-b" {:a <mesh-data>}}
+#+end_src
+
+Added tags are ephemeral — they are lost when the model is re-evaluated
+(e.g. due to parameter changes). Tags added via =add-tags= inherit the
+model's display options (color, opacity).
+
 ** =list-objects=
 
 Query all objects in the scene with optional filtering.
