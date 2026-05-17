@@ -270,14 +270,25 @@ Manual lifecycle management for OpenCascade objects.
 npm install
 #+end_src
 
+A =Justfile= is also provided — run =just install= instead to perform all
+install steps (including the patch script and WASM/CSS copies) in one
+command.
+
 ** 2. Start the shadow-cljs dev server
 
 #+begin_src sh
 npm run dev
 #+end_src
 
+Or with the Justfile:
+
+#+begin_src sh
+just dev          # default port 8777
+just dev 9999     # custom nREPL port
+#+end_src
+
 This starts:
-- An nREPL server on **port 8777** (override via =NREPL_PORT= env var, e.g. =NREPL_PORT=9999 npm run dev=)
+- An nREPL server on **port 8777** (override via =NREPL_PORT= env var or =just dev <port>=)
 - An HTTP dev server on **port 8700** serving =public/=
 
 ** 3. Open the page in a browser
