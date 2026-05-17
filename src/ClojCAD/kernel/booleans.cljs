@@ -2,13 +2,13 @@
   (:require [ClojCAD.kernel.init :as init]
             [ClojCAD.kernel.lifecycle :as lifecycle]))
 
-(defn- oc []
+(defn- ^js oc []
   @init/oc-instance)
 
-(defn- -fuse-2 [shape-a shape-b]
+(defn- -fuse-2 [^js shape-a ^js shape-b]
   (try
-    (let [ocjs (aget (oc) "OCJS")
-          result (.BooleanFuse ocjs shape-a shape-b 1e-7)]
+    (let [^js ocjs (aget (oc) "OCJS")
+          ^js result (.BooleanFuse ocjs shape-a shape-b 1e-7)]
       (when (and result (not (.IsNull result)))
         (lifecycle/track result)
         result))
@@ -16,10 +16,10 @@
       (js/console.warn "BooleanFuse failed:" e)
       nil)))
 
-(defn- -common-2 [shape-a shape-b]
+(defn- -common-2 [^js shape-a ^js shape-b]
   (try
-    (let [ocjs (aget (oc) "OCJS")
-          result (.BooleanCommon ocjs shape-a shape-b 1e-7)]
+    (let [^js ocjs (aget (oc) "OCJS")
+          ^js result (.BooleanCommon ocjs shape-a shape-b 1e-7)]
       (when (and result (not (.IsNull result)))
         (lifecycle/track result)
         result))
@@ -27,10 +27,10 @@
       (js/console.warn "BooleanCommon failed:" e)
       nil)))
 
-(defn- -cut-2 [shape-a shape-b]
+(defn- -cut-2 [^js shape-a ^js shape-b]
   (try
-    (let [ocjs (aget (oc) "OCJS")
-          result (.BooleanCut ocjs shape-a shape-b 1e-7)]
+    (let [^js ocjs (aget (oc) "OCJS")
+          ^js result (.BooleanCut ocjs shape-a shape-b 1e-7)]
       (when (and result (not (.IsNull result)))
         (lifecycle/track result)
         result))

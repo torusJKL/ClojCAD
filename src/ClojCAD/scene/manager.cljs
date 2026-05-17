@@ -18,6 +18,62 @@
 (defn- body-path? [model-name tag-label]
   (= tag-label (str model-name "-body")))
 
+(defn- matching-models
+  ([]
+   @scene)
+  ([{:keys [tag model name-matching]}]
+   (let [re (when (and name-matching (not (instance? js/RegExp name-matching)))
+              (js/RegExp. (str "^" (str/replace name-matching "*" ".*") "$")))]
+     (reduce-kv (fn [acc name-str entry]
+                  (if (and (or (nil? tag) (contains? (:tags entry) tag))
+                           (or (nil? model) (= (name model) name-str))
+                           (or (nil? name-matching)
+                               (if (instance? js/RegExp name-matching)
+                                 (.test name-matching name-str)
+                                 (.test re name-str))))
+                    (assoc acc name-str entry)
+                    acc))
+                {} @scene))))
+
+(defn show-model
+  "Show a model or specific tag in the viewport. Accepts a model name (keyword or string)
+   or a map with :tag, :model, and/or :name-matching keys for filtering." ([arg]
+   (if (map? arg)
+     (let [{:keys [tag model name-matching]} arg
+           tag-str (when tag (name tag))
+           models (matching-models {:tag tag :model model :name-matching name-matching})]
+       (doseq [[name-str _] models
+               :let [path (tag-path name-str tag-str)]]
+         (swap! scene assoc-in [name-str :tags-visible tag-str] true)
+         (when-let [^js viewer @vw/*viewer]
+           (.setObject viewer path 1 0 false false)
+           (.setState viewer path #js [1 1]))))
+     (let [name-str (name arg)
+           path (model-path name-str)]
+       (swap! scene assoc-in [name-str :visible?] true)
+       (when-let [^js viewer @vw/*viewer]
+         (.setObject viewer path 1 0 false false)
+         (.setState viewer path #js [1 1]))))))
+
+(defn hide-model
+  "Hide a model or specific tag in the viewport. Accepts the same arguments as show-model." ([arg]
+   (if (map? arg)
+     (let [{:keys [tag model name-matching]} arg
+           tag-str (when tag (name tag))
+           models (matching-models {:tag tag :model model :name-matching name-matching})]
+       (doseq [[name-str _] models
+               :let [path (tag-path name-str tag-str)]]
+         (swap! scene assoc-in [name-str :tags-visible tag-str] false)
+         (when-let [^js viewer @vw/*viewer]
+           (.setObject viewer path 0 0 false false)
+            (.setState viewer path #js [0 0]))))
+     (let [name-str (name arg)
+           path (model-path name-str)]
+       (swap! scene assoc-in [name-str :visible?] false)
+       (when-let [^js viewer @vw/*viewer]
+         (.setObject viewer path 0 0 false false)
+         (.setState viewer path #js [0 0]))))))
+
 (defn- notify-callback [changes]
   (when-let [states-change (.-states changes)]
     (when-let [states (.-new states-change)]
@@ -55,7 +111,7 @@
                               (when-let [info (reg/lookup (symbol name))]
                                 (some (set (:param-keys info)) delta)))
                             @scene)
-              viewer @vw/*viewer]
+              ^js viewer @vw/*viewer]
           (doseq [[name entry] dirty
                   :let [info (reg/lookup (symbol name))]]
             (try
@@ -89,7 +145,7 @@
    (let [{:keys [name opts]} (meta model)
          name-str (str name)
          merged (merge @params params-override)
-         viewer @vw/*viewer]
+         ^js viewer @vw/*viewer]
      (try
        (let [result (model merged)
              mesh (kernel/tessellate (:shape result))
@@ -136,61 +192,6 @@
               :visible? true
               :error (str e)}))))))
 
-(defn- matching-models
-  ([]
-   @scene)
-  ([{:keys [tag model name-matching]}]
-   (let [re (when (and name-matching (not (instance? js/RegExp name-matching)))
-              (js/RegExp. (str "^" (str/replace name-matching "*" ".*") "$")))]
-     (reduce-kv (fn [acc name-str entry]
-                  (if (and (or (nil? tag) (contains? (:tags entry) tag))
-                           (or (nil? model) (= (name model) name-str))
-                           (or (nil? name-matching)
-                               (if (instance? js/RegExp name-matching)
-                                 (.test name-matching name-str)
-                                 (.test re name-str))))
-                    (assoc acc name-str entry)
-                    acc))
-                {} @scene))))
-
-(defn show-model
-  "Show a model or specific tag in the viewport. Accepts a model name (keyword or string)
-   or a map with :tag, :model, and/or :name-matching keys for filtering." ([arg]
-   (if (map? arg)
-     (let [{:keys [tag model name-matching]} arg
-           tag-str (when tag (name tag))
-           models (matching-models {:tag tag :model model :name-matching name-matching})]
-       (doseq [[name-str _] models
-               :let [path (tag-path name-str tag-str)]]
-         (swap! scene assoc-in [name-str :tags-visible tag-str] true)
-         (when-let [viewer @vw/*viewer]
-           (.setObject viewer path 1 0 false false)
-           (.setState viewer path #js [1 1]))))
-     (let [name-str (name arg)
-           path (model-path name-str)]
-       (swap! scene assoc-in [name-str :visible?] true)
-       (when-let [viewer @vw/*viewer]
-         (.setObject viewer path 1 0 false false)
-         (.setState viewer path #js [1 1]))))))
-
-(defn hide-model
-  "Hide a model or specific tag in the viewport. Accepts the same arguments as show-model." ([arg]
-   (if (map? arg)
-     (let [{:keys [tag model name-matching]} arg
-           tag-str (when tag (name tag))
-           models (matching-models {:tag tag :model model :name-matching name-matching})]
-       (doseq [[name-str _] models
-               :let [path (tag-path name-str tag-str)]]
-         (swap! scene assoc-in [name-str :tags-visible tag-str] false)
-         (when-let [viewer @vw/*viewer]
-           (.setObject viewer path 0 0 false false)
-            (.setState viewer path #js [0 0]))))
-      (let [name-str (name arg)
-            path (model-path name-str)]
-        (swap! scene assoc-in [name-str :visible?] false)
-        (when-let [viewer @vw/*viewer]
-          (.setObject viewer path 0 0 false false)
-          (.setState viewer path #js [0 0]))))))
 
 (defn toggle-model
   "Toggle the visibility of a model or specific tag in the viewport.
@@ -203,13 +204,13 @@
         (let [path (tag-path name-str tag-str)
               new-val (not (get-in entry [:tags-visible tag-str] true))]
           (swap! scene assoc-in [name-str :tags-visible tag-str] new-val)
-          (when-let [viewer @vw/*viewer]
+          (when-let [^js viewer @vw/*viewer]
             (.setObject viewer path (if new-val 1 0) 0 false false)
             (.setState viewer path #js [(if new-val 1 0) (if new-val 1 0)])))
         (let [path (model-path name-str)
               new-val (not (:visible? entry))]
           (swap! scene assoc-in [name-str :visible?] new-val)
-          (when-let [viewer @vw/*viewer]
+          (when-let [^js viewer @vw/*viewer]
             (.setObject viewer path (if new-val 1 0) 0 false false)
             (.setState viewer path #js [(if new-val 1 0) (if new-val 1 0)])))))))
 
@@ -227,7 +228,7 @@
   "Remove a model (keyword or string) from the scene and viewport." [model-name]
   (let [name-str (name model-name)]
     (swap! scene dissoc name-str)
-    (when-let [viewer @vw/*viewer]
+    (when-let [^js viewer @vw/*viewer]
       (.removePart viewer (model-path name-str)))))
 
 (defn add-tags
@@ -242,7 +243,7 @@
                       {})))]
      (when (seq models)
        (doseq [[name-str entry] models
-               :let [viewer @vw/*viewer
+               :let [^js viewer @vw/*viewer
                      opts (:opts entry)]]
          (let [new-tags (reduce-kv (fn [m k v] (assoc m k (kernel/tessellate v))) {} tags-map)
                visible-keys (map name (keys new-tags))]
@@ -271,10 +272,11 @@
                  (when viewer
                    (.updatePart viewer (tag-path name-str label-str)
                                 (sa/build-child-part name-str tag-label tag-mesh nil opts)
-                                #js {:skipBounds true}))))))))
-     (if (map? model-id)
-       (into {} (for [[n _] models] [n (:tags (get @scene n))]))
-       (:tags (get @scene (name model-id)))))))
+                                 #js {:skipBounds true}))))))))
+      (if (map? model-id)
+        (into {} (for [[n _] models] [n (:tags (get @scene n))]))
+        (:tags (get @scene (name model-id)))))))
+
 
 (defn remove-tags
   "Remove tagged sub-shapes from a model by tag label(s). Accepts a model name or filter map.
@@ -287,7 +289,7 @@
                      {})))]
     (when (seq models)
       (doseq [[name-str _] models
-              :let [viewer @vw/*viewer]]
+              :let [^js viewer @vw/*viewer]]
         (let [tag-strs (map name tag-labels)]
           (swap! scene update name-str
             (fn [e]
@@ -307,6 +309,6 @@
   (let [name-str (name model-name)]
     (swap! scene assoc-in [name-str :opts :opacity] opacity)
     (let [{:keys [mesh opts]} (get @scene name-str)
-          viewer @vw/*viewer]
+          ^js viewer @vw/*viewer]
       (when (and viewer mesh)
         (.updatePart viewer (model-path name-str) (sa/build-part name-str mesh (assoc opts :opacity opacity)))))))

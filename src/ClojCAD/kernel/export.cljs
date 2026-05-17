@@ -2,15 +2,15 @@
   (:require [ClojCAD.kernel.init :as init]
             [ClojCAD.kernel.mesh :as mesh]))
 
-(defn- oc []
+(defn- ^js oc []
   @init/oc-instance)
 
 (defn- read-memfs! [path encoding]
-  (let [fs (.-FS (oc))]
+  (let [^js fs (.-FS (oc))]
     (.readFile fs path #js {:encoding encoding})))
 
 (defn- unlink-memfs! [path]
-  (let [fs (.-FS (oc))]
+  (let [^js fs (.-FS (oc))]
     (try (.unlink fs path) (catch :default _))))
 
 (defn- download-blob! [data filename content-type]
@@ -25,7 +25,7 @@
     (js/document.body.removeChild a)
     (js/URL.revokeObjectURL url)))
 
-(defn- invalid-shape? [s]
+(defn- invalid-shape? [^js s]
   (or (nil? s) (.IsNull s)))
 
 (defn- face-normal [v0 v1 v2]
@@ -137,18 +137,22 @@
          (catch :default e
            (js/console.warn "export-stl failed:" e)))))))
 
-(defn- transfer-all [writer shapes mode progress]
+(declare oc-ifselect-retdone)
+
+(defn- transfer-all [^js writer shapes mode progress]
   (loop [[s & rest] shapes]
     (if s
       (let [st (.Transfer_1 writer s mode true progress)]
-        (if (not= st (.. (oc) -IFSelect_ReturnStatus -IFSelect_RetDone))
+        (if (not= st (oc-ifselect-retdone))
           (do (js/console.warn "export-step: transfer failed")
               false)
           (recur rest)))
       true)))
 
-(defn- oc-ifselect-retdone []
-  (.. (oc) -IFSelect_ReturnStatus -IFSelect_RetDone))
+(defn- ^js oc-ifselect-retdone []
+  (let [^js oc-inst (oc)
+        ^js ret-status (.-IFSelect_ReturnStatus oc-inst)]
+    (.-IFSelect_RetDone ret-status)))
 
 (defn export-step
   "Export one or more shapes to a STEP file and trigger a browser download.
@@ -158,10 +162,11 @@
    (let [shapes (if (sequential? shape) shape [shape])]
      (if (some invalid-shape? shapes)
        (js/console.warn "export-step: invalid shape in input")
-       (let [oc-inst (oc)
-             writer (js/Reflect.construct (.-STEPControl_Writer_1 oc-inst) #js [])
-             mode (.. oc-inst -STEPControl_StepModelType -STEPControl_AsIs)
-             progress (js/Reflect.construct (.-Message_ProgressRange_1 oc-inst) #js [])]
+       (let [^js oc-inst (oc)
+             ^js writer (js/Reflect.construct (.-STEPControl_Writer_1 oc-inst) #js [])
+             ^js step-model-type (.-STEPControl_StepModelType oc-inst)
+             mode (.-STEPControl_AsIs step-model-type)
+             ^js progress (js/Reflect.construct (.-Message_ProgressRange_1 oc-inst) #js [])]
          (try
            (when (transfer-all writer shapes mode progress)
              (let [memfs-path (str "/" filename)]

@@ -4,14 +4,14 @@
             [ClojCAD.kernel.primitives :as primitives]
             [ClojCAD.kernel.lifecycle :as lifecycle]))
 
-(defn- oc-module [] @init/oc-instance)
+(defn- ^js oc-module [] @init/oc-instance)
 
 (defn- pnt [x y]
-  (let [oc-m (oc-module)]
+  (let [^js oc-m (oc-module)]
     (js/Reflect.construct (.-gp_Pnt_3 oc-m) #js [x y 0])))
 
 (defn- line-edge [p1 p2]
-  (let [oc-m (oc-module)
+  (let [^js oc-m (oc-module)
         maker (js/Reflect.construct (.-GC_MakeSegment_1 oc-m) #js [p1 p2])
         seg (.Value maker)
         ptr (.get seg)
@@ -22,7 +22,7 @@
     edge))
 
 (defn- quadratic-edge [p1 cp p2]
-  (let [oc-m (oc-module)
+  (let [^js oc-m (oc-module)
         pt-list (js/Reflect.construct (.-TColgp_Array1OfPnt_2 oc-m) #js [1 3])
         _ (.SetValue pt-list 1 p1)
         _ (.SetValue pt-list 2 cp)
@@ -35,7 +35,7 @@
     edge))
 
 (defn- cubic-edge [p1 cp1 cp2 p2]
-  (let [oc-m (oc-module)
+  (let [^js oc-m (oc-module)
         pt-list (js/Reflect.construct (.-TColgp_Array1OfPnt_2 oc-m) #js [1 4])
         _ (.SetValue pt-list 1 p1)
         _ (.SetValue pt-list 2 cp1)
@@ -48,29 +48,29 @@
     (.delete builder)
     edge))
 
-(defn- add-edge-to-wire [wire-builder edge]
-  (let [oc-m (oc-module)
+(defn- add-edge-to-wire [^js wire-builder edge]
+  (let [^js oc-m (oc-module)
         inner-builder (js/Reflect.construct (.-BRepBuilderAPI_MakeWire_2 oc-m) #js [edge])
         inner-wire (.Wire inner-builder)]
     (.delete inner-builder)
     (.Add_2 wire-builder inner-wire)))
 
 (defn- make-face-from-wire [wire]
-  (let [oc-m (oc-module)
+  (let [^js oc-m (oc-module)
         builder (js/Reflect.construct (.-BRepBuilderAPI_MakeFace_15 oc-m) #js [wire false])
         face (.Face builder)]
     (.delete builder)
     face))
 
 (defn- add-hole-to-face [face wire]
-  (let [oc-m (oc-module)
+  (let [^js oc-m (oc-module)
         builder (js/Reflect.construct (.-BRepBuilderAPI_MakeFace_22 oc-m) #js [face wire])
         result (.Face builder)]
     (.delete builder)
     result))
 
 (defn- close-current-contour! [text-faces cur-wire]
-  (when-let [w @cur-wire]
+  (when-let [^js w @cur-wire]
     (try
       (let [wire (.Wire w)]
         (if (empty? @text-faces)
@@ -83,7 +83,7 @@
         (js/console.warn "Could not close contour:" e)))))
 
 (defn commands->face [commands]
-  (let [oc-m (oc-module)
+  (let [^js oc-m (oc-module)
         make-wire (.-BRepBuilderAPI_MakeWire_1 oc-m)
         text-faces (atom [])
         first-point (atom nil)

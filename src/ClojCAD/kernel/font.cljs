@@ -33,49 +33,54 @@
     (fn [resolve reject]
       (let [request (.open js/indexedDB "clojcad-fonts" 1)]
         (set! (.-onupgradeneeded request)
-          (fn [e]
+          (fn [^js e]
             (let [db (.-target.result e)]
               (when-not (.contains (.-objectStoreNames db) "fonts")
                 (.createObjectStore db "fonts")))))
         (set! (.-onsuccess request)
-          (fn [e] (resolve (.-target.result e))))
+          (fn [^js e] (resolve (.-target.result e))))
         (set! (.-onerror request)
-          (fn [e] (reject (.-error e))))))))
+          (fn [^js e] (reject (.-error e))))))))
 
-(defn- put-font! [db name data]
+(defn- close-db-after [^js db promise]
+  (-> promise
+      (.then (fn [v] (.close db) v))
+      (.catch (fn [e] (.close db) (throw e)))))
+
+(defn- put-font! [^js db name data]
   (js/Promise.
     (fn [resolve reject]
       (let [tx (.transaction db "fonts" "readwrite")
             store (.objectStore tx "fonts")
             request (.put store data name)]
         (set! (.-onsuccess request) (fn [_] (resolve true)))
-        (set! (.-onerror request) (fn [e] (reject (.-error e))))))))
+        (set! (.-onerror request) (fn [^js e] (reject (.-error e))))))))
 
-(defn- get-all-fonts [db]
+(defn- get-all-fonts [^js db]
   (js/Promise.
     (fn [resolve reject]
       (let [tx (.transaction db "fonts" "readonly")
             store (.objectStore tx "fonts")
             request (.getAll store)]
         (set! (.-onsuccess request)
-          (fn [e] (resolve (.-result e))))
+          (fn [^js e] (resolve (.-result e))))
         (set! (.-onerror request)
-          (fn [e] (reject (.-error e))))))))
+          (fn [^js e] (reject (.-error e))))))))
 
-(defn- get-all-keys [db]
+(defn- get-all-keys [^js db]
   (js/Promise.
     (fn [resolve reject]
       (let [tx (.transaction db "fonts" "readonly")
             store (.objectStore tx "fonts")
             request (.getAllKeys store)]
         (set! (.-onsuccess request)
-          (fn [e] (resolve (.-result e))))
+          (fn [^js e] (resolve (.-result e))))
         (set! (.-onerror request)
-          (fn [e] (reject (.-error e))))))))
+          (fn [^js e] (reject (.-error e))))))))
 
 (defn- restore-from-idb! []
   (-> (open-db)
-      (.then (fn [db]
+      (.then (fn [^js db]
         (close-db-after db
           (-> (js/Promise.all
                 #js [(get-all-keys db) (get-all-fonts db)])
@@ -107,11 +112,6 @@
                bundled-fonts)))
       (.then (fn [_] (restore-from-idb!)))))
 
-(defn- close-db-after [db promise]
-  (-> promise
-      (.then (fn [v] (.close db) v))
-      (.catch (fn [e] (.close db) (throw e)))))
-
 (defn register-font!
   "Register a custom font by fetching it from the given URL. The font is parsed via
    opentype.js and persisted to IndexedDB for future sessions. Returns a Promise of the Font object." [name url]
@@ -121,7 +121,7 @@
         (let [font (opentype/parse buf)]
           (swap! registry assoc name font)
           (-> (open-db)
-              (.then (fn [db]
+              (.then (fn [^js db]
                 (close-db-after db (put-font! db name buf))))
               (.catch (fn [e]
                 (js/console.warn "IndexedDB unavailable, font not persisted:" e))))
@@ -140,7 +140,7 @@
         (let [font (opentype/parse buf)]
           (swap! registry assoc name font)
           (-> (open-db)
-              (.then (fn [db]
+              (.then (fn [^js db]
                 (close-db-after db (put-font! db name buf))))
               (.catch (fn [e]
                 (js/console.warn "IndexedDB unavailable, font not persisted:" e))))

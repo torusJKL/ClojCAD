@@ -2,8 +2,23 @@
   (:require [ClojCAD.kernel.init :as init]
             [ClojCAD.kernel.lifecycle :as lifecycle]))
 
-(defn- oc []
+(defn- ^js oc []
   @init/oc-instance)
+
+(defn- with-trsf [^js shape f]
+  (let [trsf (js/Reflect.construct (.-gp_Trsf_1 (oc)) #js [])
+        _ (f trsf)
+        loc (js/Reflect.construct (.-TopLoc_Location_4 (oc)) #js [trsf])
+        moved (.Moved shape loc false)]
+    (lifecycle/track moved)
+    moved))
+
+(defn translate
+  "Translate (move) a shape by the given x, y, z offsets." [^js shape x y z]
+  (with-trsf shape
+    (fn [^js trsf]
+      (.SetTranslation_1 trsf
+        (js/Reflect.construct (.-gp_Vec_4 (oc)) #js [x y z])))))
 
 (defn make-sphere
   "Create a solid sphere with the given radius." [radius]
@@ -104,20 +119,6 @@
              (.delete face-builder)
              (lifecycle/track face))))))))
 
-(defn- with-trsf [shape f]
-  (let [trsf (js/Reflect.construct (.-gp_Trsf_1 (oc)) #js [])
-        _ (f trsf)
-        loc (js/Reflect.construct (.-TopLoc_Location_4 (oc)) #js [trsf])
-        moved (.Moved shape loc false)]
-    (lifecycle/track moved)
-    moved))
-
-(defn translate
-  "Translate (move) a shape by the given x, y, z offsets." [shape x y z]
-  (with-trsf shape
-    (fn [trsf]
-      (.SetTranslation_1 trsf
-        (js/Reflect.construct (.-gp_Vec_4 (oc)) #js [x y z])))))
 
 (defn extrude
   "Extrude a planar face along a direction vector [dx dy dz] to create a solid.
@@ -134,9 +135,9 @@
            shape))))))
 
 (defn rotate
-  "Rotate a shape around the given axis vector by the specified degrees." [shape axis-x axis-y axis-z degrees]
+  "Rotate a shape around the given axis vector by the specified degrees." [^js shape axis-x axis-y axis-z degrees]
   (with-trsf shape
-    (fn [trsf]
+    (fn [^js trsf]
       (.SetRotation_1 trsf
         (js/Reflect.construct (.-gp_Ax1_2 (oc)) #js [
           (js/Reflect.construct (.-gp_Pnt_3 (oc)) #js [0 0 0])

@@ -21,16 +21,16 @@
         (set! (.-onerror reader) #(reject (.-error %)))
         (.readAsText reader file)))))
 
-(defn- sm-ns [] (js* "ClojCAD.scene.manager"))
-(defn- vw-ns [] (js* "ClojCAD.viewport.viewer"))
+(defn- ^js sm-ns [] (js* "ClojCAD.scene.manager"))
+(defn- ^js vw-ns [] (js* "ClojCAD.viewport.viewer"))
 
 (defn- get-viewer []
-  (when-let [ns (vw-ns)]
+  (when-let [^js ns (vw-ns)]
     (when-let [viewer-atom (.-*viewer ns)]
       @viewer-atom)))
 
 (defn- add-to-scene! [name-str shape mesh]
-  (let [ns (sm-ns)]
+  (let [^js ns (sm-ns)]
     (swap! (.-scene ns) assoc name-str
       {:occt-shape shape
        :mesh mesh
@@ -47,7 +47,7 @@
             mesh (kernel/tessellate shape)
             nv (.-length (:vertices mesh))
             ni (.-length (:indices mesh))
-            viewer (get-viewer)
+            ^js viewer (get-viewer)
             part (sa/build-part name-str mesh)]
         (js/console.log "import-stl: mesh has" nv "vertices," ni "indices")
         (add-to-scene! name-str shape mesh)
@@ -63,7 +63,7 @@
     (if shape
       (let [name-str (.-name file)
             mesh (kernel/tessellate shape)
-            viewer (get-viewer)
+            ^js viewer (get-viewer)
             part (sa/build-part name-str mesh)]
         (add-to-scene! name-str shape mesh)
         (when viewer
