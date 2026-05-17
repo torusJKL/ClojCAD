@@ -8,8 +8,9 @@
    [ClojCAD.model.registry-test]
    [ClojCAD.model.tag-test]
    [ClojCAD.model.core-test]
-   [ClojCAD.scene.manager-test]
-   [ClojCAD.viewport.shape-adapter-test]
+    [ClojCAD.scene.manager-test]
+    [ClojCAD.scene.api-test]
+    [ClojCAD.viewport.shape-adapter-test]
    [ClojCAD.viewport.config-test]
    [ClojCAD.viewport.loading-test]
    ;; WASM-dependent tests
@@ -33,6 +34,7 @@
    'ClojCAD.model.tag-test
    'ClojCAD.model.core-test
    'ClojCAD.scene.manager-test
+   'ClojCAD.scene.api-test
    'ClojCAD.viewport.shape-adapter-test
    'ClojCAD.viewport.config-test
    'ClojCAD.viewport.loading-test)

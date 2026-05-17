@@ -147,11 +147,49 @@ back to the metadata set in =defmodel=.
 
 ** =hide-model= / =show-model=
 
-Toggle model visibility in the scene.
+Toggle model or tag visibility. Accepts either a model name (existing
+behavior) or a filter map for tag-level operations. =show-tag= and
+=hide-tag= are removed — use the map form instead.
 
 #+begin_src clojure
+;; Whole model visibility (unchanged)
 (sm/hide-model 'my-box)
 (sm/show-model 'my-box)
+
+;; Tag visibility — show/hide :sphere tag on all models that have it
+(sm/show-model {:tag :sphere})
+(sm/hide-model {:tag :sphere})
+
+;; Tag visibility on a specific model (replaces show-tag / hide-tag)
+(sm/show-model {:tag :sphere :model 'joined})
+(sm/hide-model {:tag :sphere :model 'joined})
+
+;; Tag visibility restricted to name-matching models
+(sm/show-model {:tag :sphere :name-matching "foo*"})
+#+end_src
+
+** =toggle-model=
+
+Invert visibility. Accepts the same filter map format.
+
+#+begin_src clojure
+;; Toggle a tag on all matching models
+(sm/toggle-model {:tag :sphere})
+
+;; Toggle a tag on name-matching models only
+(sm/toggle-model {:tag :sphere :name-matching "foo*"})
+
+;; Toggle whole model visibility
+(sm/toggle-model {:model 'my-box})
+#+end_src
+
+** =show-all= / =hide-all=
+
+Show or hide every model in the scene.
+
+#+begin_src clojure
+(sm/show-all)
+(sm/hide-all)
 #+end_src
 
 ** =set-opacity=
@@ -184,13 +222,35 @@ body (uses a dynamic binding).
             :box box}}))
 #+end_src
 
-** =hide-tag= / =show-tag=
+** =list-objects=
 
-Toggle visibility of tagged sub-shapes.
+Query all objects in the scene with optional filtering.
 
 #+begin_src clojure
-(sm/hide-tag 'joined :sphere)
-(sm/show-tag 'joined :sphere)
+;; All objects
+(api/list-objects)
+
+;; Filter by tag
+(api/list-objects {:tag :sphere})
+
+;; Filter by visibility
+(api/list-objects {:visibility :visible})
+(api/list-objects {:visibility :hidden})
+
+;; Filter by name-matching (glob pattern or regex)
+(api/list-objects {:name-matching "foo*"})
+(api/list-objects {:name-matching #"^test-\d+"})
+
+;; Combined filters
+(api/list-objects {:tag :sphere :visibility :visible :name-matching "foo*"})
+#+end_src
+
+** =list-tags=
+
+Return all unique tag labels across all models as a set of keywords.
+
+#+begin_src clojure
+(api/list-tags)   ;; => #{:sphere :box :base}
 #+end_src
 
 ** Export
@@ -345,10 +405,17 @@ tab. For example:
 #+begin_src clojure
 (require '[ClojCAD.kernel.api :as kernel])
 (require '[ClojCAD.scene.manager :as sm])
+(require '[ClojCAD.scene.api :as api])
 (require '[ClojCAD.demo :as demo])
 
 (kernel/make-sphere 5)
 (sm/show demo/sphere {:r 20})
+
+;; Query and bulk visibility
+(api/list-objects)
+(api/list-tags)
+(sm/show-all)
+(sm/hide-model {:tag :sphere})
 #+end_src
 
 The viewer in the browser will update in real time.
@@ -411,7 +478,12 @@ The application is organized into several namespaces:
 - =ClojCAD.model.tag= :: Dynamic-binding-based sub-shape tagging
      within model bodies.
 - =ClojCAD.scene.manager= :: Manages the scene: watches the =params=
-     atom, drives tessellation and viewer updates.
+     atom, drives tessellation and viewer updates. Provides overloaded
+     =show-model=/=hide-model= with filter-map dispatch, =toggle-model=,
+     =show-all=/=hide-all=.
+- =ClojCAD.scene.api= :: Query API for the scene: =list-objects=
+     (with optional =:tag=, =:visibility=, =:name-matching= filters)
+     and =list-tags=. Forwards visibility functions from manager.
 - =ClojCAD.viewport.viewer= :: Wraps the three-cad-viewer Display and
      Viewer classes.
 - =ClojCAD.viewport.shape-adapter= :: Converts tessellation data into
@@ -461,6 +533,7 @@ file has a corresponding test file:
 | =src/ClojCAD/model/tag.cljs=           | =test/ClojCAD/model/tag_test.cljs=           |
 | =src/ClojCAD/model/core.cljs=          | =test/ClojCAD/model/core_test.cljs=          |
 | =src/ClojCAD/scene/manager.cljs=       | =test/ClojCAD/scene/manager_test.cljs=       |
+| =src/ClojCAD/scene/api.cljs=           | =test/ClojCAD/scene/api_test.cljs=           |
 | =src/ClojCAD/viewport/shape-adapter.cljs= | =test/ClojCAD/viewport/shape_adapter_test.cljs= |
 | =src/ClojCAD/viewport/config.cljs=     | =test/ClojCAD/viewport/config_test.cljs=     |
 
