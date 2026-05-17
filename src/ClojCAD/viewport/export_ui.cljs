@@ -35,18 +35,20 @@
 
 (defn- on-export! [format]
   (close-dropdown!)
-  (let [{:keys [scene current-model]} (scene-data)]
-    (if (nil? current-model)
-      (do (js/console.warn "export-ui: no model displayed")
-          (loading/notify! "No model to export"))
-      (let [entry (get scene current-model)
-            shape (:occt-shape entry)]
-        (if (nil? shape)
-          (do (js/console.warn (str "export-ui: no shape found for " current-model))
-              (loading/notify! "No shape data for current model"))
-          (let [filename (str current-model "." format)
-                opts @*export-quality]
-            (do-export! format shape filename opts)))))))
+  (let [{:keys [scene]} (scene-data)
+        visible-entries (->> scene
+                             (filter (fn [[_ v]] (:visible? v)))
+                             (remove (fn [[_ v]] (nil? (:occt-shape v))))
+                             vec)
+        visible-shapes (mapv (fn [[_ v]] (:occt-shape v)) visible-entries)]
+    (if (empty? visible-shapes)
+      (do (js/console.warn "export-ui: no visible models to export")
+          (loading/notify! "No visible models to export"))
+      (let [opts @*export-quality
+            filename (if (= (count visible-shapes) 1)
+                       (str (ffirst visible-entries) "." format)
+                       (str "export." format))]
+        (do-export! format visible-shapes filename opts)))))
 
 (defn- make-dropdown-item [label format]
   (let [item (js/document.createElement "div")]
