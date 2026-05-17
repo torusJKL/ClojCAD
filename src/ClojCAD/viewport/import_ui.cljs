@@ -121,7 +121,8 @@
     (.addEventListener input "change" on-file-selected!)
     input))
 
-(defn mount-import-button! [display]
+(defn mount-import-button!
+  "Mount the STL/STEP file import button into the three-cad-viewer toolbar." [display]
   (let [toolbar (.. display -cadTool -container)]
     (when-not (nil? toolbar)
       (let [file-input (make-file-input)

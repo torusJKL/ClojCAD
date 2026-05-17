@@ -8,7 +8,9 @@
             [ClojCAD.viewport.config :as cfg]
             [ClojCAD.demo :as demo]))
 
-(defn init []
+(defn init
+  "Main entry point for ClojCAD. Initializes the viewer, loads config, starts the
+   OpenCASCADE kernel, then launches the demo." []
   (vw/init-viewer!)
   (-> (cfg/load-config!)
       (.then (fn [_]

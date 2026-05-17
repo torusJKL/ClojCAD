@@ -125,7 +125,10 @@
     (peek @text-faces)))
 
 (defn text3d
-  [text size & {:keys [font height] :or {font "Cousine" height 0.15}}]
+  "Create a 3D text shape from the given string.
+   Options: :font (font name, default \"Cousine\"), :height (extrusion height factor, default 0.15).
+   Uses the registered font to generate glyph outlines via opentype.js, then extrudes the face.
+   Returns a TopoDS_Shape or nil if the font is not found." [text size & {:keys [font height] :or {font "Cousine" height 0.15}}]
   (let [font-obj (font/lookup-font font)]
     (if font-obj
       (let [path (.getPath font-obj text 0 0 size)

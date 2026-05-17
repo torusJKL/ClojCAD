@@ -12,12 +12,14 @@
                       (js/parseInt (str "0x" s) 16))
     :else (throw (js/Error. (str "invalid color: " color)))))
 
-(defn set-default-shape-color! [color]
+(defn set-default-shape-color!
+  "Set the default color for newly created shapes. Accepts a hex number or CSS color string." [color]
   (let [c (parse-color color)]
     (reset! *default-shape-color c)
     (js/console.log (str "default shape color set to 0x" (.. c (toString 16))))))
 
-(defn get-default-shape-color []
+(defn get-default-shape-color
+  "Return the current default shape color as a hex number." []
   @*default-shape-color)
 
 (when (and (exists? js/window) (not (undefined? js/window)))
@@ -25,7 +27,9 @@
     (fn [color]
       (set-default-shape-color! color))))
 
-(defn load-config! []
+(defn load-config!
+  "Load configuration from config.edn. Currently reads :default-shape-color.
+   Returns a Promise." []
   (-> (js/fetch "config.edn")
       (.then (fn [resp]
                (if (.-ok resp)

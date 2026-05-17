@@ -457,6 +457,54 @@ tab. For example:
 
 The viewer in the browser will update in real time.
 
+** 6. Browse documentation at the REPL
+
+Every public function and macro has a docstring. Access it with =doc=:
+
+#+begin_src clojure
+(require '[cljs.repl :refer-macros [doc find-doc apropos]])
+
+;; Find all functions matching a pattern:
+(apropos tessellate)
+
+;; Switch to a namespace, then doc any local symbol:
+(in-ns 'ClojCAD.kernel.api)
+(doc fuse)
+(doc make-sphere)
+
+;; Or fully qualify from anywhere:
+(doc ClojCAD.kernel.primitives/make-sphere)
+(doc ClojCAD.scene.manager/toggle-model)
+(doc ClojCAD.scene.manager/show)
+(doc ClojCAD.kernel.booleans/cut)
+(doc ClojCAD.model.defmodel/defmodel)
+#+end_src
+
+*** Exploring available namespaces and functions
+
+Since =all-ns= and =ns-publics= are not available in ClojureScript's
+browser runtime, use JavaScript interop in three steps:
+
+1. List top-level namespace groups:
+   #+begin_src clojure
+   (js/Object.keys js/ClojCAD)
+   ;; => #js ["model" "kernel" "viewport" "scene" "demo" "core"]
+   #+end_src
+
+2. Drill into a group to find its sub-namespaces:
+   #+begin_src clojure
+   (js/Object.keys (js* "ClojCAD.kernel"))
+   ;; => #js ["api" "booleans" "export" "font" "import" "init"
+   ;;         "lifecycle" "mesh" "primitives" "text3d"]
+   #+end_src
+
+3. List all public functions within a namespace:
+   #+begin_src clojure
+   (sort (js/Object.keys (js* "ClojCAD.kernel.api")))
+   #+end_src
+
+Then pass any symbol to =doc= to read its documentation.
+
 * Troubleshooting
 
 ** Closure compilation fails with "import.meta" errors

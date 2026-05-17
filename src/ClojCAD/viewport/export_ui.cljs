@@ -73,7 +73,8 @@
         "<path d=\"M4 19c0-.55.45-1 1-1h14c.55 0 1 .45 1 1s-.45 1-1 1H5c-.55 0-1-.45-1-1z\"/>"))
     svg))
 
-(defn mount-export-button! [display]
+(defn mount-export-button!
+  "Mount the STL/STEP export dropdown button into the three-cad-viewer toolbar." [display]
   (let [toolbar (.. display -cadTool -container)]
     (when-not (nil? toolbar)
       (let [help-btn (.querySelector toolbar ".tcv_button_help")

@@ -12,7 +12,8 @@
   (when-let [handler @*notify-handler]
     (handler change)))
 
-(defn set-notify-handler! [f]
+(defn set-notify-handler!
+  "Register a callback function for receiving viewer state-change notifications." [f]
   (reset! *notify-handler f))
 
 (defn- update-size! []
@@ -27,7 +28,10 @@
         (when @*rendered?
           (.resize display))))))
 
-(defn init-viewer! []
+(defn init-viewer!
+  "Initialize the three-cad-viewer in the #cad-view DOM element.
+   Mounts the export and import UI buttons and sets up window resize handling.
+   Returns the Viewer instance." []
   (let [container (js/document.getElementById "cad-view")
         w (.-clientWidth container)
         h (.-clientHeight container)
@@ -49,7 +53,9 @@
     (js/window.addEventListener "resize" update-size!)
     viewer))
 
-(defn render-initial! [shapes]
+(defn render-initial!
+  "Render the initial set of shapes in the viewer. Called once on first show.
+   Marks the viewer as rendered so subsequent calls use addPart/updatePart." [shapes]
   (when-let [viewer @*viewer]
     (update-size!)
     (.render viewer shapes #js {:edgeColor 0x707070} #js {})

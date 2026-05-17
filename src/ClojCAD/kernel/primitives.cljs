@@ -5,7 +5,8 @@
 (defn- oc []
   @init/oc-instance)
 
-(defn make-sphere [radius]
+(defn make-sphere
+  "Create a solid sphere with the given radius." [radius]
   (let [ctor (.-BRepPrimAPI_MakeSphere_1 (oc))
         builder (js/Reflect.construct ctor #js [radius])
         shape (.Shape builder)]
@@ -14,7 +15,8 @@
     shape))
 
 (defn make-box
-  ([dx dy dz] (make-box dx dy dz false))
+  "Create a rectangular box with dimensions dx, dy, dz.
+   When centered? is true, the box is centered at the origin." ([dx dy dz] (make-box dx dy dz false))
   ([dx dy dz centered?]
    (let [ctor (.-BRepPrimAPI_MakeBox_2 (oc))
          builder (js/Reflect.construct ctor #js [dx dy dz])
@@ -26,7 +28,8 @@
        shape))))
 
 (defn make-cylinder
-  ([radius height] (make-cylinder radius height false))
+  "Create a cylinder with the given radius and height.
+   When centered? is true, the cylinder is centered along Z." ([radius height] (make-cylinder radius height false))
   ([radius height centered?]
    (let [ctor (.-BRepPrimAPI_MakeCylinder_1 (oc))
          builder (js/Reflect.construct ctor #js [radius height])
@@ -37,7 +40,8 @@
        (translate shape 0 0 (- (/ height 2)))
        shape))))
 
-(defn make-cone [radius1 radius2 height]
+(defn make-cone
+  "Create a truncated cone with bottom radius1, top radius2, and the given height." [radius1 radius2 height]
   (let [ctor (.-BRepPrimAPI_MakeCone_1 (oc))
         builder (js/Reflect.construct ctor #js [radius1 radius2 height])
         shape (.Shape builder)]
@@ -46,7 +50,7 @@
     shape))
 
 (defn make-circle
-  ([radius] (make-circle radius false))
+  "Create a circle of the given radius. Returns a face by default, or a wire when wire? is true." ([radius] (make-circle radius false))
   ([radius wire?]
    (when (pos? radius)
      (let [ax2 (js/Reflect.construct (.-gp_Ax2_4 (oc)) #js [
@@ -79,7 +83,8 @@
     edge))
 
 (defn make-polygon
-  ([points] (make-polygon points false))
+  "Create a polygon from a sequence of [x y z] points. Returns a face by default,
+   or a wire when wire? is true. Requires at least 3 points." ([points] (make-polygon points false))
   ([points wire?]
    (when (>= (count points) 3)
      (let [pts (mapv (fn [[x y z]]
@@ -107,14 +112,16 @@
     (lifecycle/track moved)
     moved))
 
-(defn translate [shape x y z]
+(defn translate
+  "Translate (move) a shape by the given x, y, z offsets." [shape x y z]
   (with-trsf shape
     (fn [trsf]
       (.SetTranslation_1 trsf
         (js/Reflect.construct (.-gp_Vec_4 (oc)) #js [x y z])))))
 
 (defn extrude
-  ([face direction]
+  "Extrude a planar face along a direction vector [dx dy dz] to create a solid.
+   The face must be a valid planar face (e.g. from make-polygon or make-circle)." ([face direction]
    (let [[dx dy dz] direction]
      (when face
        (when (or (not (zero? dx)) (not (zero? dy)) (not (zero? dz)))
@@ -126,7 +133,8 @@
            (lifecycle/track shape)
            shape))))))
 
-(defn rotate [shape axis-x axis-y axis-z degrees]
+(defn rotate
+  "Rotate a shape around the given axis vector by the specified degrees." [shape axis-x axis-y axis-z degrees]
   (with-trsf shape
     (fn [trsf]
       (.SetRotation_1 trsf

@@ -6,7 +6,10 @@
 (defonce loading? (atom true))
 (defonce error (atom nil))
 
-(defn init-kernel []
+(defn init-kernel
+  "Initialize the OpenCASCADE WASM kernel and load bundled fonts.
+   Returns a Promise that resolves when the kernel and fonts are ready.
+   Check `loading?` or `error` atoms for status." []
   (-> (init-oc #js {:locateFile (fn [path]
                                   (if (.endsWith path ".wasm")
                                     "/cascadestudio.wasm"
