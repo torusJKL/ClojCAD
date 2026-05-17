@@ -30,11 +30,19 @@
     (make-leaf mname (str "/" mname) shape-data
                (or color (cfg/get-default-shape-color)) (or opacity 1.0) #js [1 1])))
 
-(defn build-child-part [model-name tag-label shape-data & [pos]]
-  (let [mname (name model-name)
-        tname (name tag-label)]
-    (make-leaf tname (str "/" mname "/" tname) shape-data
-               (cfg/get-default-shape-color) 1.0 #js [1 1] pos)))
+(defn build-child-part
+  ([model-name tag-label shape-data]
+   (build-child-part model-name tag-label shape-data nil nil))
+  ([model-name tag-label shape-data pos]
+   (build-child-part model-name tag-label shape-data pos nil))
+  ([model-name tag-label shape-data pos opts]
+   (let [mname (name model-name)
+         tname (name tag-label)
+         {:keys [color opacity]} (or opts {})]
+     (make-leaf tname (str "/" mname "/" tname) shape-data
+                (or color (cfg/get-default-shape-color))
+                (or opacity 1.0)
+                #js [1 1] pos))))
 
 (defn build-shapes-tree [model-name main-part tag-parts]
   (let [mname (name model-name)

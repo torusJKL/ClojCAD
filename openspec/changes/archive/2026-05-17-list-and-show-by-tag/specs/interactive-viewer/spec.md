@@ -1,4 +1,5 @@
-## Requirements
+## MODIFIED Requirements
+
 ### Requirement: Scene manager coordinates model display
 The system SHALL provide a scene manager that maintains a map of displayed models and their meshes, using the three-cad-viewer Viewer API for rendering.
 
@@ -24,7 +25,7 @@ The system SHALL provide a scene manager that maintains a map of displayed model
 - **THEN** the `:color` option SHALL set the part's `color` field (if provided)
 
 ### Requirement: Reactive re-evaluation on param change
-The scene manager SHALL watch the shared params atom and re-evaluate dirty models. (Unchanged from previous spec — the reactive watcher remains identical in logic.)
+The scene manager SHALL watch the shared params atom and re-evaluate dirty models.
 
 #### Scenario: Param change triggers re-evaluation
 - **WHEN** user evaluates `(swap! params assoc :r 20)`
@@ -49,55 +50,17 @@ The system SHALL use the library's hierarchical tree to display tagged intermedi
 - **WHEN** user toggles a tagged intermediate in the library tree panel
 - **THEN** the notification callback SHALL update the `scene` atom's `:tags-visible` map for that model and label
 
-#### Scenario: Tags added via add-tags appear as sub-entries
-- **WHEN** user calls `(add-tags 'my-model {:label shape})`
-- **THEN** the new tag SHALL be added as a child part at path `"/my-model/:label"`
-- **THEN** the new tag SHALL appear as a collapsible entry in the tree panel
+## REMOVED Requirements
 
-#### Scenario: Tags removed via remove-tags disappear from tree
-- **WHEN** user calls `(remove-tags 'my-model :label)` and the tag was previously shown in the tree
-- **THEN** the child part at path `"/my-model/:label"` SHALL be removed
-- **THEN** the tag entry SHALL disappear from the tree panel
+### Requirement: Show tags on individual models
+**Reason**: Subsumed by overloaded `show-model`/`hide-model`
+**Migration**: Use `(show-model {:tag :sphere :model 'my-model})` instead of `(show-tag 'my-model :sphere)`
 
-### Requirement: Tagless models use flat structure; add-tags restructures to tree
-`show` SHALL add tagless models as a flat part at `/root/<model-name>`. When `add-tags` is called on a tagless model, the scene manager SHALL restructure it by removing the flat part and adding a tree with a `<model-name>-body` child and the new tag children. Models already in tree form (with tags) receive new tags via child part updates.
+### Requirement: Hide tags on individual models
+**Reason**: Subsumed by overloaded `show-model`/`hide-model`
+**Migration**: Use `(hide-model {:tag :sphere :model 'my-model})` instead of `(hide-tag 'my-model :sphere)`
 
-#### Scenario: Tagless model displayed as flat part
-- **WHEN** user calls `(show model)` and the model has no tags
-- **THEN** the model SHALL be added as a flat part at `/root/<model-name>`
-
-#### Scenario: First add-tags restructures flat model to tree
-- **WHEN** user calls `(show model)` on a tagless model, then calls `(add-tags 'model {:label shape})`
-- **THEN** the flat part at `/root/<model-name>` SHALL be removed
-- **THEN** a tree part SHALL be added at `/root/<model-name>` containing a `<model-name>-body` child and a `:label` child
-- **THEN** the `:label` tag SHALL appear in the scene atom's `:tags` map
-
-#### Scenario: Adding tags to an already-tree model adds children
-- **WHEN** a model already has tags in the scene and user calls `(add-tags 'model {:another shape})`
-- **THEN** the new tag SHALL be added as a child part at `/root/<model-name>/:another`
-- **THEN** existing children (including `<model-name>-body`) SHALL remain unchanged
-
-### Requirement: Scene manager handles dynamic child part lifecycle
-The scene manager SHALL support adding and removing individual child parts on an existing scene entry, including tessellation, viewer sync, and `:tags-visible` initialization.
-
-#### Scenario: Added tag initializes as visible
-- **WHEN** a tag is added via `add-tags`
-- **THEN** the new tag SHALL be initialized with `:tags-visible` set to `true`
-
-#### Scenario: Removed tag cleans up viewer and state
-- **WHEN** a tag is removed via `remove-tags`
-- **THEN** the scene atom's `:tags` and `:tags-visible` SHALL be dissoc'd for that label
-- **THEN** the viewer SHALL remove the corresponding child part path
-
-### Requirement: Scene manager displays imported shapes
-The system SHALL support adding imported shapes to the scene via the scene manager.
-
-#### Scenario: Imported shape is added to scene
-- **WHEN** a shape is imported from an STL or STEP file
-- **THEN** the import handler SHALL create a model entry in the scene atom using the filename as the model name
-- **THEN** the shape SHALL be tessellated via `kernel/tessellate`
-- **THEN** the mesh SHALL be pushed to the viewer via the existing scene manager display pipeline
-- **THEN** the imported shape SHALL appear in the viewer and tree panel
+## ADDED Requirements
 
 ### Requirement: Unified show-model with filter map dispatch
 `show-model` SHALL accept either a model identifier (symbol/keyword) for whole-model visibility, or a filter map for tag-level visibility operations.
@@ -177,4 +140,3 @@ The system SHALL provide functions to show or hide all models in the scene at on
 #### Scenario: Show all with empty scene is a no-op
 - **WHEN** user calls `(show-all)` with no models in the scene
 - **THEN** no state SHALL be modified
-
